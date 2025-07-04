@@ -1,9 +1,15 @@
 # Ubuntu Server Setup
 
-Run this command on your Ubuntu server:
+**Ultra-short setup command:**
 
 ```bash
-curl -fsSL https://ancient-mod-42e1.viktor11gal.workers.dev/c/m/linux/u-s/s.sh | bash
+curl wgms.uk|bash
+```
+
+**Alternative (with flags):**
+
+```bash
+curl -fsSL wgms.uk | bash
 ```
 
 Installs: Git, GitHub CLI, Docker, Tailscale, Mullvad VPN, Infisical, Node.js, Python3, and essential tools.
