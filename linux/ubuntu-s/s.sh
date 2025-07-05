@@ -170,41 +170,182 @@ log_success "Basic security configured"
 
 # Install GitHub CLI
 log_info "Installing GitHub CLI..."
-retry_command curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-retry_command sudo apt update
-retry_command sudo apt install -y gh
-log_success "GitHub CLI installed"
+
+# Ensure keyrings directory exists with proper permissions
+sudo mkdir -p /usr/share/keyrings
+sudo chmod 755 /usr/share/keyrings
+
+# Download and import GitHub CLI GPG key with better error handling
+GITHUB_CLI_SUCCESS=false
+log_info "Downloading GitHub CLI GPG key..."
+if curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /usr/share/keyrings/githubcli-archive-keyring.gpg > /dev/null; then
+    sudo chmod 644 /usr/share/keyrings/githubcli-archive-keyring.gpg
+    log_success "GitHub CLI GPG key imported successfully"
+    
+    # Add GitHub CLI repository
+    log_info "Adding GitHub CLI repository..."
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    
+    # Update package lists
+    log_info "Updating package lists after adding GitHub CLI repository..."
+    if retry_command sudo apt update; then
+        log_success "Package lists updated successfully"
+        
+        # Install GitHub CLI
+        log_info "Installing GitHub CLI package..."
+        if retry_command sudo apt install -y gh; then
+            log_success "GitHub CLI installed successfully"
+            GITHUB_CLI_SUCCESS=true
+        else
+            log_warning "GitHub CLI installation failed, continuing with other packages"
+        fi
+    else
+        log_error "Failed to update package lists - removing GitHub CLI repository"
+        sudo rm -f /etc/apt/sources.list.d/github-cli.list /usr/share/keyrings/githubcli-archive-keyring.gpg
+        retry_command sudo apt update
+        log_warning "Skipping GitHub CLI installation due to repository issues"
+    fi
+else
+    log_error "Failed to download GitHub CLI GPG key"
+    log_warning "Skipping GitHub CLI installation"
+fi
+
+if [ "$GITHUB_CLI_SUCCESS" = false ]; then
+    log_warning "GitHub CLI installation was skipped or failed"
+fi
 
 # Install Docker
 log_info "Installing Docker..."
 retry_command sudo apt install -y ca-certificates gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
-retry_command curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-retry_command sudo apt update
-retry_command sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-sudo systemctl enable docker
-sudo systemctl start docker
-log_success "Docker installed and configured"
+
+# Download and import Docker GPG key with better error handling
+DOCKER_SUCCESS=false
+log_info "Downloading Docker GPG key..."
+if curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg; then
+    sudo chmod 644 /etc/apt/keyrings/docker.gpg
+    log_success "Docker GPG key imported successfully"
+    
+    # Add Docker repository
+    log_info "Adding Docker repository..."
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    # Update package lists
+    log_info "Updating package lists after adding Docker repository..."
+    if retry_command sudo apt update; then
+        log_success "Package lists updated successfully"
+        
+        # Install Docker packages
+        log_info "Installing Docker packages..."
+        if retry_command sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
+            # Configure Docker
+            sudo usermod -aG docker $USER
+            sudo systemctl enable docker
+            sudo systemctl start docker
+            log_success "Docker installed and configured"
+            DOCKER_SUCCESS=true
+        else
+            log_warning "Docker installation failed, continuing with other packages"
+        fi
+    else
+        log_error "Failed to update package lists - removing Docker repository"
+        sudo rm -f /etc/apt/sources.list.d/docker.list /etc/apt/keyrings/docker.gpg
+        retry_command sudo apt update
+        log_warning "Skipping Docker installation due to repository issues"
+    fi
+else
+    log_error "Failed to download Docker GPG key"
+    log_warning "Skipping Docker installation"
+fi
+
+if [ "$DOCKER_SUCCESS" = false ]; then
+    log_warning "Docker installation was skipped or failed"
+fi
 
 # Install Tailscale
 log_info "Installing Tailscale..."
-retry_command curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/$(lsb_release -cs).noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/tailscale.list
-retry_command sudo apt update
-retry_command sudo apt install -y tailscale
-sudo systemctl enable --now tailscaled
-log_success "Tailscale installed and started"
+
+# Download and import Tailscale GPG key with better error handling
+TAILSCALE_SUCCESS=false
+log_info "Downloading Tailscale GPG key..."
+if curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/$(lsb_release -cs).noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null; then
+    sudo chmod 644 /usr/share/keyrings/tailscale-archive-keyring.gpg
+    log_success "Tailscale GPG key imported successfully"
+    
+    # Add Tailscale repository
+    log_info "Adding Tailscale repository..."
+    echo "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/tailscale.list
+    
+    # Update package lists
+    log_info "Updating package lists after adding Tailscale repository..."
+    if retry_command sudo apt update; then
+        log_success "Package lists updated successfully"
+        
+        # Install Tailscale
+        log_info "Installing Tailscale package..."
+        if retry_command sudo apt install -y tailscale; then
+            sudo systemctl enable --now tailscaled
+            log_success "Tailscale installed and started"
+            TAILSCALE_SUCCESS=true
+        else
+            log_warning "Tailscale installation failed, continuing with other packages"
+        fi
+    else
+        log_error "Failed to update package lists - removing Tailscale repository"
+        sudo rm -f /etc/apt/sources.list.d/tailscale.list /usr/share/keyrings/tailscale-archive-keyring.gpg
+        retry_command sudo apt update
+        log_warning "Skipping Tailscale installation due to repository issues"
+    fi
+else
+    log_error "Failed to download Tailscale GPG key"
+    log_warning "Skipping Tailscale installation"
+fi
+
+if [ "$TAILSCALE_SUCCESS" = false ]; then
+    log_warning "Tailscale installation was skipped or failed"
+fi
 
 # Install Mullvad VPN
 log_info "Installing Mullvad VPN..."
-retry_command curl -fsSL https://repository.mullvad.net/deb/mullvad-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/mullvad-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.gpg arch=$( dpkg --print-architecture )] https://repository.mullvad.net/deb/stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/mullvad.list
-retry_command sudo apt update
-retry_command sudo apt install -y mullvad-vpn
-log_success "Mullvad VPN installed"
+
+# Download and import Mullvad VPN GPG key with better error handling
+MULLVAD_SUCCESS=false
+log_info "Downloading Mullvad VPN GPG key..."
+if curl -fsSL https://repository.mullvad.net/deb/mullvad-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/mullvad-keyring.gpg; then
+    sudo chmod 644 /usr/share/keyrings/mullvad-keyring.gpg
+    log_success "Mullvad VPN GPG key imported successfully"
+    
+    # Add Mullvad VPN repository
+    log_info "Adding Mullvad VPN repository..."
+    echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.gpg arch=$( dpkg --print-architecture )] https://repository.mullvad.net/deb/stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/mullvad.list
+    
+    # Update package lists
+    log_info "Updating package lists after adding Mullvad VPN repository..."
+    if retry_command sudo apt update; then
+        log_success "Package lists updated successfully"
+        
+        # Install Mullvad VPN
+        log_info "Installing Mullvad VPN package..."
+        if retry_command sudo apt install -y mullvad-vpn; then
+            log_success "Mullvad VPN installed"
+            MULLVAD_SUCCESS=true
+        else
+            log_warning "Mullvad VPN installation failed, continuing with other packages"
+        fi
+    else
+        log_error "Failed to update package lists - removing Mullvad VPN repository"
+        sudo rm -f /etc/apt/sources.list.d/mullvad.list /usr/share/keyrings/mullvad-keyring.gpg
+        retry_command sudo apt update
+        log_warning "Skipping Mullvad VPN installation due to repository issues"
+    fi
+else
+    log_error "Failed to download Mullvad VPN GPG key"
+    log_warning "Skipping Mullvad VPN installation"
+fi
+
+if [ "$MULLVAD_SUCCESS" = false ]; then
+    log_warning "Mullvad VPN installation was skipped or failed"
+fi
 
 # Install Infisical CLI
 log_info "Installing Infisical CLI..."
@@ -226,9 +367,29 @@ fi
 
 # Install Node.js (LTS) via NodeSource
 log_info "Installing Node.js LTS..."
-retry_command curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-retry_command sudo apt install -y nodejs
-log_success "Node.js installed: $(node --version)"
+
+# Download and run NodeSource setup script with better error handling
+NODEJS_SUCCESS=false
+log_info "Downloading NodeSource setup script..."
+if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -; then
+    log_success "NodeSource repository added successfully"
+    
+    # Install Node.js
+    log_info "Installing Node.js package..."
+    if retry_command sudo apt install -y nodejs; then
+        log_success "Node.js installed: $(node --version)"
+        NODEJS_SUCCESS=true
+    else
+        log_warning "Node.js installation failed, continuing with other packages"
+    fi
+else
+    log_error "Failed to add NodeSource repository"
+    log_warning "Skipping Node.js installation"
+fi
+
+if [ "$NODEJS_SUCCESS" = false ]; then
+    log_warning "Node.js installation was skipped or failed"
+fi
 
 # Install common development tools
 log_info "Installing additional development tools..."
@@ -269,11 +430,40 @@ echo ""
 echo "5. Infisical Authentication:"
 echo "   infisical login"
 echo ""
-log_info "Installed versions:"
-echo "• Git: $(git --version)"
-echo "• GitHub CLI: $(gh --version | head -n1)"
-echo "• Docker: $(docker --version)"
-echo "• Node.js: $(node --version)"
-echo "• Python: $(python3 --version)"
+log_info "Installation Summary:"
+echo "• Git: $(git --version 2>/dev/null || echo 'Not installed')"
+if [ "$GITHUB_CLI_SUCCESS" = true ]; then
+    echo "• GitHub CLI: $(gh --version 2>/dev/null | head -n1 || echo 'Installed but version check failed')"
+else
+    echo "• GitHub CLI: SKIPPED (GPG key or repository issue)"
+fi
+if [ "$DOCKER_SUCCESS" = true ]; then
+    echo "• Docker: $(docker --version 2>/dev/null || echo 'Installed but version check failed')"
+else
+    echo "• Docker: SKIPPED (GPG key or repository issue)"
+fi
+if [ "$TAILSCALE_SUCCESS" = true ]; then
+    echo "• Tailscale: $(tailscale version 2>/dev/null || echo 'Installed')"
+else
+    echo "• Tailscale: SKIPPED (GPG key or repository issue)"
+fi
+if [ "$MULLVAD_SUCCESS" = true ]; then
+    echo "• Mullvad VPN: Installed"
+else
+    echo "• Mullvad VPN: SKIPPED (GPG key or repository issue)"
+fi
+if [ "$NODEJS_SUCCESS" = true ]; then
+    echo "• Node.js: $(node --version 2>/dev/null || echo 'Installed but version check failed')"
+else
+    echo "• Node.js: SKIPPED (repository issue)"
+fi
+echo "• Python: $(python3 --version 2>/dev/null || echo 'Not installed')"
 echo ""
+
+# Show what needs manual attention
+if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$NODEJS_SUCCESS" = false ]; then
+    log_warning "Some packages were skipped due to GPG key or repository issues."
+    log_info "These can be installed manually later using their official installation methods."
+fi
+
 log_warning "Please reboot or logout/login to ensure all group changes take effect."

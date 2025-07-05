@@ -77,6 +77,8 @@ Invoke-WebRequest -Uri "https://wgms.uk/windows/setup.ps1" | Invoke-Expression
 - **Error handling** with clear messages
 - **No root execution** (except where required)
 - **Timeout protection** for network calls
+- **GPG key validation** for all repositories
+- **Graceful degradation** when packages fail
 
 ## 📊 Comprehensive Logging
 
@@ -158,6 +160,55 @@ curl -fsSL https://raw.githubusercontent.com/lso0/config/main/macos/setup.sh | b
 ```bash
 # Test without execution
 curl wgms.uk | bash -n
+```
+
+## 🔧 Troubleshooting
+
+### **Common Issues and Solutions**
+
+#### **GPG Key Verification Errors**
+```
+The following signatures couldn't be verified because the public key is not available
+```
+**Solution**: The script now handles GPG key failures gracefully by skipping problematic packages and continuing with others.
+
+#### **Repository Not Signed Errors**
+```
+The repository 'https://...' is not signed
+```
+**Solution**: Enhanced error handling automatically removes failed repositories and continues installation.
+
+#### **Network Connectivity Issues**
+```
+curl: (6) Could not resolve host
+```
+**Solution**: The script includes retry logic and network validation.
+
+### **Check Installation Status**
+After running the setup, check what was installed:
+```bash
+./view-logs.sh --recent | grep "Installation Summary" -A 20
+```
+
+### **Manual Installation for Skipped Packages**
+If packages were skipped, install them manually:
+
+**GitHub CLI:**
+```bash
+# Alternative installation via snap
+sudo snap install gh
+```
+
+**Docker:**
+```bash
+# Alternative installation via snap
+sudo snap install docker
+```
+
+**Node.js:**
+```bash
+# Alternative installation via snap or nvm
+sudo snap install node --classic
 ```
 
 ## 📁 Repository Structure
