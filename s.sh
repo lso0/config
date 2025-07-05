@@ -6,6 +6,26 @@
 
 set -euo pipefail
 
+# Setup logging
+LOG_DIR="$HOME/.config/wgms-setup"
+LOG_FILE="$LOG_DIR/setup-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p "$LOG_DIR"
+
+# Create log file with session info
+cat > "$LOG_FILE" << EOF
+# Universal System Setup Log
+# Started: $(date)
+# User: $(whoami)
+# PWD: $(pwd)
+# Command: $0 $*
+# Session ID: $$
+EOF
+
+# Function to log both to console and file
+log_to_file() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -13,21 +33,48 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
+# Enhanced logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
+    log_to_file "INFO: $1"
 }
 
 log_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
+    log_to_file "SUCCESS: $1"
 }
 
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
+    log_to_file "WARNING: $1"
 }
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+    log_to_file "ERROR: $1"
+}
+
+# Function to log command execution
+log_command() {
+    local cmd="$1"
+    log_to_file "COMMAND: $cmd"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - COMMAND: $cmd" >> "$LOG_FILE"
+}
+
+# Function to log system information
+log_system_info() {
+    log_to_file "=== SYSTEM INFORMATION ==="
+    log_to_file "OS: $(uname -s)"
+    log_to_file "Kernel: $(uname -r)"
+    log_to_file "Architecture: $(uname -m)"
+    log_to_file "Hostname: $(hostname)"
+    if command -v lsb_release >/dev/null 2>&1; then
+        log_to_file "Distribution: $(lsb_release -d | cut -f2)"
+    fi
+    log_to_file "Uptime: $(uptime)"
+    log_to_file "Disk Space: $(df -h / | tail -1)"
+    log_to_file "Memory: $(free -h | grep '^Mem:' || echo 'N/A')"
+    log_to_file "=== END SYSTEM INFO ==="
 }
 
 # System detection function
@@ -142,11 +189,34 @@ detect_network() {
     echo "$network_info"
 }
 
+# Cleanup function for script exit
+cleanup() {
+    local exit_code=$?
+    log_to_file "=== SCRIPT EXIT ==="
+    log_to_file "Exit code: $exit_code"
+    log_to_file "Duration: $SECONDS seconds"
+    log_to_file "Log file: $LOG_FILE"
+    if [[ $exit_code -eq 0 ]]; then
+        log_success "Setup completed successfully! Log: $LOG_FILE"
+    else
+        log_error "Setup failed with exit code $exit_code. Check log: $LOG_FILE"
+    fi
+    log_to_file "=== END SESSION ==="
+}
+
+# Set trap for cleanup
+trap cleanup EXIT
+
 # Main function
 main() {
     log_info "🚀 Universal System Setup - Detecting Environment..."
+    log_to_file "=== STARTING UNIVERSAL SETUP ==="
+    
+    # Log system information
+    log_system_info
     
     # Detect system information
+    log_info "Detecting system configuration..."
     local system_info=$(detect_system)
     local hardware_info=$(detect_hardware)
     local network_info=$(detect_network)
@@ -157,6 +227,15 @@ main() {
     log_info "System: $os_type ($distro) on $arch"
     [[ -n "$hardware_info" ]] && log_info "Hardware: $hardware_info"
     log_info "Network: $network_info"
+    
+    # Log detection results
+    log_to_file "=== DETECTION RESULTS ==="
+    log_to_file "OS Type: $os_type"
+    log_to_file "Distribution: $distro"
+    log_to_file "Architecture: $arch"
+    log_to_file "Hardware: $hardware_info"
+    log_to_file "Network: $network_info"
+    log_to_file "=== END DETECTION ==="
     
     # Determine which script to run
     local script_url=""
@@ -196,13 +275,20 @@ main() {
     esac
     
     log_success "✅ Selected script: $script_url"
+    log_to_file "Selected script URL: $script_url"
     log_info "🔄 Downloading and executing setup script..."
     
-    # Download and execute the appropriate script
-    if curl -fsSL "$script_url" | bash; then
+    # Download and execute the appropriate script with logging
+    log_to_file "=== EXECUTING PLATFORM SCRIPT ==="
+    log_command "curl -fsSL '$script_url' | bash"
+    
+    # Execute with output capture
+    if curl -fsSL "$script_url" 2>&1 | tee -a "$LOG_FILE" | bash; then
         log_success "🎉 Setup completed successfully!"
+        log_to_file "Platform script execution: SUCCESS"
     else
         log_error "❌ Setup failed. Please check the logs above."
+        log_to_file "Platform script execution: FAILED"
         exit 1
     fi
 }

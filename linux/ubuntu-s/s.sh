@@ -6,6 +6,26 @@
 
 set -euo pipefail  # Enhanced error handling
 
+# Setup logging
+LOG_DIR="$HOME/.config/wgms-setup"
+LOG_FILE="$LOG_DIR/ubuntu-setup-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p "$LOG_DIR"
+
+# Create log file with session info
+cat > "$LOG_FILE" << EOF
+# Ubuntu Server Setup Log
+# Started: $(date)
+# User: $(whoami)
+# PWD: $(pwd)
+# Command: $0 $*
+# Session ID: $$
+EOF
+
+# Function to log both to console and file
+log_to_file() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -13,44 +33,79 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
+# Enhanced logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
+    log_to_file "INFO: $1"
 }
 
 log_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
+    log_to_file "SUCCESS: $1"
 }
 
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
+    log_to_file "WARNING: $1"
 }
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+    log_to_file "ERROR: $1"
 }
 
-# Function to retry commands with exponential backoff
+# Function to log command execution with output capture
+log_command() {
+    local cmd="$1"
+    log_to_file "COMMAND: $cmd"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - COMMAND: $cmd" >> "$LOG_FILE"
+}
+
+# Function to retry commands with exponential backoff and logging
 retry_command() {
     local max_attempts=3
     local delay=1
     local attempt=1
     
+    log_command "$*"
+    
     while [ $attempt -le $max_attempts ]; do
-        if "$@"; then
+        log_to_file "Attempt $attempt of $max_attempts: $*"
+        if "$@" 2>&1 | tee -a "$LOG_FILE"; then
+            log_to_file "Command succeeded on attempt $attempt"
             return 0
         else
             if [ $attempt -eq $max_attempts ]; then
                 log_error "Command failed after $max_attempts attempts: $*"
+                log_to_file "FAILED: $* (after $max_attempts attempts)"
                 return 1
             fi
             log_warning "Attempt $attempt failed. Retrying in ${delay}s..."
+            log_to_file "Retrying in ${delay}s..."
             sleep $delay
             delay=$((delay * 2))
             attempt=$((attempt + 1))
         fi
     done
 }
+
+# Cleanup function for script exit
+cleanup() {
+    local exit_code=$?
+    log_to_file "=== UBUNTU SETUP EXIT ==="
+    log_to_file "Exit code: $exit_code"
+    log_to_file "Duration: $SECONDS seconds"
+    log_to_file "Log file: $LOG_FILE"
+    if [[ $exit_code -eq 0 ]]; then
+        log_success "Ubuntu setup completed! Log saved: $LOG_FILE"
+    else
+        log_error "Ubuntu setup failed with exit code $exit_code. Check log: $LOG_FILE"
+    fi
+    log_to_file "=== END UBUNTU SESSION ==="
+}
+
+# Set trap for cleanup
+trap cleanup EXIT
 
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
@@ -65,6 +120,18 @@ if ! sudo -n true 2>/dev/null; then
 fi
 
 log_info "Starting Ubuntu Server One-Click Setup..."
+log_to_file "=== UBUNTU SETUP STARTING ==="
+
+# Log system information
+log_to_file "=== SYSTEM INFORMATION ==="
+log_to_file "OS: $(uname -a)"
+log_to_file "Distribution: $(lsb_release -a 2>/dev/null || cat /etc/os-release)"
+log_to_file "Uptime: $(uptime)"
+log_to_file "Disk Space: $(df -h)"
+log_to_file "Memory: $(free -h)"
+log_to_file "User: $(whoami)"
+log_to_file "Groups: $(groups)"
+log_to_file "=== END SYSTEM INFO ==="
 
 # System Update
 log_info "Updating system packages..."

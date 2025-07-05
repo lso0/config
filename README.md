@@ -78,6 +78,68 @@ Invoke-WebRequest -Uri "https://wgms.uk/windows/setup.ps1" | Invoke-Expression
 - **No root execution** (except where required)
 - **Timeout protection** for network calls
 
+## 📊 Comprehensive Logging
+
+### **Automatic Logging**
+All setup sessions are automatically logged to `~/.config/wgms-setup/`:
+
+```
+~/.config/wgms-setup/
+├── setup-20241204-143022.log      # Universal detector
+├── ubuntu-setup-20241204-143025.log # Ubuntu-specific
+└── ...
+```
+
+### **What Gets Logged**
+- ✅ **System information** (OS, hardware, network)
+- ✅ **All commands executed** with timestamps
+- ✅ **Command output** (stdout and stderr)
+- ✅ **Error messages** and warnings
+- ✅ **Execution duration** and exit codes
+- ✅ **Detection results** and script selection
+
+### **Log Analysis Tools**
+
+**View recent log:**
+```bash
+./view-logs.sh --recent
+```
+
+**List all logs:**
+```bash
+./view-logs.sh --list
+```
+
+**Show only errors:**
+```bash
+./view-logs.sh --errors
+```
+
+**Show failed setups:**
+```bash
+./view-logs.sh --failed
+```
+
+**Show executed commands:**
+```bash
+./view-logs.sh --commands
+```
+
+### **Log Viewer Options**
+```bash
+./view-logs.sh [option]
+
+Options:
+  -l, --list       List all log files
+  -r, --recent     Show most recent log
+  -a, --all        Show all logs concatenated
+  -f, --failed     Show only failed setups
+  -s, --success    Show only successful setups
+  -e, --errors     Show only error lines
+  -w, --warnings   Show only warning lines
+  -c, --commands   Show only executed commands
+```
+
 ## 🚀 Advanced Usage
 
 ### Manual Platform Selection
@@ -103,13 +165,14 @@ curl wgms.uk | bash -n
 ```
 config/
 ├── s.sh                    # Universal detector
+├── view-logs.sh           # Log analysis utility
 ├── linux/
-│   ├── ubuntu-s/s.sh      # Ubuntu/Debian
-│   └── nixos/setup.sh     # NixOS
+│   ├── ubuntu-s/s.sh      # Ubuntu/Debian setup
+│   └── nixos/setup.sh     # NixOS setup
 ├── macos/
-│   └── setup.sh           # macOS
+│   └── setup.sh           # macOS setup
 └── windows/
-    └── setup.ps1          # Windows
+    └── setup.ps1          # Windows setup
 ```
 
 ## 🔗 Direct Links
