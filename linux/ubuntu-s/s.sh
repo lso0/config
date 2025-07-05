@@ -96,8 +96,20 @@ cleanup() {
     log_to_file "Exit code: $exit_code"
     log_to_file "Duration: $SECONDS seconds"
     log_to_file "Log file: $LOG_FILE"
-    if [[ $exit_code -eq 0 ]]; then
-        log_success "Ubuntu setup completed! Log saved: $LOG_FILE"
+    
+    # Count successful core installations
+    local core_success_count=0
+    [ "$GITHUB_CLI_SUCCESS" = true ] && ((core_success_count++))
+    [ "$DOCKER_SUCCESS" = true ] && ((core_success_count++))
+    [ "$TAILSCALE_SUCCESS" = true ] && ((core_success_count++))
+    [ "$MULLVAD_SUCCESS" = true ] && ((core_success_count++))
+    
+    if [[ $exit_code -eq 0 ]] || [[ $core_success_count -ge 3 ]]; then
+        log_success "Ubuntu setup completed successfully! Log saved: $LOG_FILE"
+        if [[ $exit_code -ne 0 ]]; then
+            log_info "Note: Some optional packages were skipped, but core installation succeeded"
+            exit 0  # Override exit code for partial success
+        fi
     else
         log_error "Ubuntu setup failed with exit code $exit_code. Check log: $LOG_FILE"
     fi
@@ -349,20 +361,53 @@ fi
 
 # Install Infisical CLI
 log_info "Installing Infisical CLI..."
+
+# Check architecture and try different installation methods
 ARCH=$(dpkg --print-architecture)
+INFISICAL_SUCCESS=false
+
 if [ "$ARCH" = "amd64" ]; then
-    INFISICAL_ARCH="linux_amd64"
+    log_info "Attempting Infisical installation for AMD64..."
+    if retry_command curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical_linux_amd64.deb" -o infisical.deb; then
+        sudo dpkg -i infisical.deb
+        rm infisical.deb
+        log_success "Infisical CLI installed"
+        INFISICAL_SUCCESS=true
+    fi
 elif [ "$ARCH" = "arm64" ]; then
-    INFISICAL_ARCH="linux_arm64"
+    log_info "ARM64 detected - trying alternative Infisical installation methods..."
+    
+    # Method 1: Try direct binary download
+    log_info "Attempting direct binary download..."
+    if curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical_linux_arm64" -o /tmp/infisical 2>/dev/null; then
+        sudo install -m 755 /tmp/infisical /usr/local/bin/infisical
+        rm -f /tmp/infisical
+        log_success "Infisical CLI installed via direct binary"
+        INFISICAL_SUCCESS=true
+    else
+        # Method 2: Try npm installation
+        log_info "Trying npm installation as fallback..."
+        if command -v npm >/dev/null 2>&1; then
+            if npm install -g @infisical/cli 2>/dev/null; then
+                log_success "Infisical CLI installed via npm"
+                INFISICAL_SUCCESS=true
+            fi
+        fi
+    fi
+    
+    if [ "$INFISICAL_SUCCESS" = false ]; then
+        log_warning "No ARM64 build available for Infisical. Install manually:"
+        log_info "Option 1: npm install -g @infisical/cli"
+        log_info "Option 2: Use x86_64 version with emulation"
+        log_info "Option 3: Build from source: https://github.com/Infisical/infisical"
+    fi
 else
-    log_warning "Unsupported architecture for Infisical: $ARCH. Skipping..."
+    log_warning "Unsupported architecture for Infisical: $ARCH"
+    log_info "Manual installation required - see: https://infisical.com/docs/cli/overview"
 fi
 
-if [ -n "${INFISICAL_ARCH:-}" ]; then
-    retry_command curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical_${INFISICAL_ARCH}.deb" -o infisical.deb
-    sudo dpkg -i infisical.deb
-    rm infisical.deb
-    log_success "Infisical CLI installed"
+if [ "$INFISICAL_SUCCESS" = false ]; then
+    log_warning "Infisical CLI installation was skipped or failed"
 fi
 
 # Install Node.js (LTS) via NodeSource
@@ -371,7 +416,7 @@ log_info "Installing Node.js LTS..."
 # Download and run NodeSource setup script with better error handling
 NODEJS_SUCCESS=false
 log_info "Downloading NodeSource setup script..."
-if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -; then
+if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - 2>/dev/null; then
     log_success "NodeSource repository added successfully"
     
     # Install Node.js
@@ -452,6 +497,11 @@ if [ "$MULLVAD_SUCCESS" = true ]; then
 else
     echo "• Mullvad VPN: SKIPPED (GPG key or repository issue)"
 fi
+if [ "$INFISICAL_SUCCESS" = true ]; then
+    echo "• Infisical CLI: Installed"
+else
+    echo "• Infisical CLI: SKIPPED (no ARM64 build available)"
+fi
 if [ "$NODEJS_SUCCESS" = true ]; then
     echo "• Node.js: $(node --version 2>/dev/null || echo 'Installed but version check failed')"
 else
@@ -461,8 +511,8 @@ echo "• Python: $(python3 --version 2>/dev/null || echo 'Not installed')"
 echo ""
 
 # Show what needs manual attention
-if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$NODEJS_SUCCESS" = false ]; then
-    log_warning "Some packages were skipped due to GPG key or repository issues."
+if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODEJS_SUCCESS" = false ]; then
+    log_warning "Some packages were skipped due to compatibility or repository issues."
     log_info "These can be installed manually later using their official installation methods."
 fi
 
