@@ -1,0 +1,10 @@
+- clean: ['~']
+
+- link:
+    ~/.bashrc:
+      path: bashrc
+      force: true
+    ~/.config/xfce4:
+      path: config/xfce4
+      force: true
+

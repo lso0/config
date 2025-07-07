@@ -1,0 +1,5 @@
+#!/usr/bin/env /lib/runit/invoke-run
+
+[ -e /etc/runit/verbose ] && echo "invoke-run: starting ${PWD##*/}"
+
+exec /usr/sbin/pcscd --foreground $PCSCD_ARGS 2>&1

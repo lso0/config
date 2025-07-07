@@ -1,0 +1,19 @@
+/var/log/gvm/gvmd.log {
+	compress
+	missingok
+	notifempty
+	sharedscripts
+	create 640 _gvm _gvm
+        daily
+        rotate 7
+        postrotate
+	    if [ -s /run/gvm/gvmd.pid ]; then kill -1 `cat /run/gvm/gvmd.pid`; fi
+	    openvaslogs=`ls /var/log/gvm/gvmd.log.*`
+	    if [ -n "$openvaslogs" ]; then
+		chown _gvm:_gvm $openvaslogs
+		chmod 640 $openvaslogs
+	    fi
+	endscript
+
+}
+

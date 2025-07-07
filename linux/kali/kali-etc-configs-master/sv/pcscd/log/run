@@ -1,0 +1,4 @@
+#!/bin/sh
+chown _runit-log:adm '/var/log/runit/pcscd'
+chmod 750 '/var/log/runit/pcscd'
+exec chpst -u _runit-log svlogd -tt '/var/log/runit/pcscd'

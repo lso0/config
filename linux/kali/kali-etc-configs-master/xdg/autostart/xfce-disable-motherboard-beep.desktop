@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Disable motherboard beep on Xfce
+Comment=Mute terminal and logout beep
+Exec=xset b off
+Terminal=false
+OnlyShowIn=XFCE;

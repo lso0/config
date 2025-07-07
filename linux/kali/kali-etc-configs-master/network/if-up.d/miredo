@@ -1,0 +1,38 @@
+#! /bin/sh
+# Reload Miredo when an interface comes up
+
+set -e
+
+# Don't bother to reload when lo is configured.
+if [ "$IFACE" = lo ]; then
+	exit 0
+fi
+
+# Only run from ifup.
+if [ "$MODE" != start ]; then
+	exit 0
+fi
+
+# Miredo only cares about (underlying) IPv4 interfaces.
+#if [ "$ADDRFAM" != inet ]; then
+#	exit 0
+#fi
+
+# Actually, due to this bug:
+#  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=475188
+# exclude IPX and IPv6 explicitly instead.
+if [ "$ADDRFAM" = "ipx" ] || [ "$ADDRFAM" = "inet6" ]; then
+	exit 0
+fi
+
+# Is /usr mounted?
+if [ ! -e /usr/sbin/miredo ]; then
+	exit 0
+fi
+
+# Is the miredo service running?
+if ! invoke-rc.d --quiet miredo status >/dev/null; then
+	exit 0
+fi
+
+invoke-rc.d --quiet miredo reload || true

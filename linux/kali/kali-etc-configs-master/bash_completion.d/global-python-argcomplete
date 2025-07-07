@@ -1,0 +1,7 @@
+# Enable python-argcomplete global completions
+# This checks for a PYTHON_ARGCOMPLETE_OK in the first 1024 bytes of any
+# executable, and if found will attempt to use argcomplete completions.
+
+if [[ -e /usr/lib/python3/dist-packages/argcomplete/bash_completion.d/_python-argcomplete ]]; then
+	. /usr/lib/python3/dist-packages/argcomplete/bash_completion.d/_python-argcomplete
+fi

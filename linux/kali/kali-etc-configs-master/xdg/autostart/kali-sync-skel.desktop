@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Copy missing config files from /etc/skel
+Exec=/bin/sh -c "cp -rT --update=none /etc/skel/ ~"

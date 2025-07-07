@@ -1,0 +1,4 @@
+# Allow members of group kali-trusted to execute any command without a
+# password prompt
+%kali-trusted   ALL=(ALL:ALL) NOPASSWD: ALL
+

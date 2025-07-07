@@ -1,0 +1,5 @@
+// Make apt more reliable with respect to temporary network failures
+Acquire::Retries "3";
+
+// Display extra informative messages when APT's cache is updated (i.e. apt update)
+Apt::Update::Post-Invoke { "if [ -x /usr/bin/kali-check-apt-sources ]; then /usr/bin/kali-check-apt-sources || true; fi"; };

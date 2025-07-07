@@ -1,0 +1,22 @@
+# The configurations proposed here are only used if /etc/ssl/openssl.cnf has
+# been modified to make use of it. The kali-tweaks tool lets you easily switch
+# between "Wide Compatibility" and "Strong Security" modes.
+#
+# By default a kali system should be configured for wide compatibility,
+# to easily interact with servers using old vulnerable protocols.
+
+[kali_wide_compatibility]
+MinProtocol = SSLv3
+CipherString = ALL:@SECLEVEL=0
+Options = UnsafeLegacyRenegotiation
+
+[kali_wide_compatibility_providers]
+default = default_sect
+legacy = legacy_sect
+
+[kali_strong_security]
+MinProtocol = TLSv1.2
+CipherString = DEFAULT:@SECLEVEL=2
+
+[kali_strong_security_providers]
+default = default_sect

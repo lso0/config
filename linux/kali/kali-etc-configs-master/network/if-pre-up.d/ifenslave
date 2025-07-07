@@ -1,0 +1,233 @@
+#!/bin/sh
+
+[ "$VERBOSITY" = 1 ] && set -x
+
+[ "$ADDRFAM" = meta ] && exit 0
+
+add_master()
+{
+	# Return if $IFACE is already a bonding interface.
+	[ -f "/sys/class/net/$IFACE/bonding/slaves" ] && return
+
+	ip link add dev "$IFACE" type bond
+}
+
+sysfs_change_down()
+{
+	# Called with :
+	# $1 = basename of the file in bonding/ to write to.
+	# $2 = value to write. Won't write if $2 is empty.
+	if [ -n "$2" ] ; then
+		# If the value we plan to write is different from the current one...
+		if ! grep -sq "\\<$2\\>" "/sys/class/net/$BOND_MASTER/bonding/$1" ; then
+			# ...and the master is up...
+			if ip link show "$BOND_MASTER" | grep -sq '[<,]UP[,>]' ; then
+				# ...bring the master down.
+				ip link set dev "$BOND_MASTER" down
+			fi
+		fi
+		sysfs "$1" "$2"
+	fi
+}
+
+sysfs()
+{
+	# Called with :
+	# $1 = basename of the file in bonding/ to write to.
+	# $2 = value to write. Won't write if $2 is empty.
+	if [ -n "$2" ] ; then
+		echo "$2" > "/sys/class/net/$BOND_MASTER/bonding/$1"
+		return $?
+	fi
+	return 0
+}
+
+sysfs_add()
+{
+	#??Called with :
+	# $1 = target filename.
+	# $2 = values to write.
+	for value in $2; do
+		# Do not add $2 to $1 if already present.
+		if ! grep -sq "\\<$value\\>" "/sys/class/net/$BOND_MASTER/bonding/$1"
+		then
+		    sysfs "$1" "+$value"
+		fi
+	done
+}
+
+# early_setup_master is the place where we do master setup that need to be done before enslavement.
+early_setup_master()
+{
+	# Warning: the order in which we write into the sysfs files is important.
+	# Double check in drivers/net/bonding/bond_sysfs.c in the Linux kernel source tree
+	# before changing anything here.
+
+	# fail_over_mac must be set before enslavement of any slaves.
+	sysfs fail_over_mac "$IF_BOND_FAIL_OVER_MAC"
+}
+
+enslave_slaves()
+{
+	case "$BOND_SLAVES" in
+		none)
+			BOND_SLAVES=""
+			;;
+		all)
+			BOND_SLAVES=$(sed -ne 's/ *\(eth[^:]*\):.*/\1/p' /proc/net/dev)
+			;;
+	esac
+
+	[ "$VERBOSITY" = 1 ] && v=-v
+	for slave in $BOND_SLAVES ; do
+		export IFENSLAVE_ENV_NAME="IFUPDOWN_$slave"
+		IFUPDOWN_IFACE="$(printenv "$IFENSLAVE_ENV_NAME")"
+		unset IFENSLAVE_ENV_NAME
+		if ( ( ifquery --state "$slave" >/dev/null 2>&1 ) && ( ifquery "$slave" | grep -q bond-master ) ) || [ -n "$IFUPDOWN_IFACE" ] ; then
+			# Skipping interface that's already up or being configured and has bonding configuration
+			continue
+		else
+			# Ensure $slave is down.
+			ip link set "$slave" down 2>/dev/null
+			if ! sysfs_add slaves "$slave" 2>/dev/null ; then
+				echo "Failed to enslave $slave to $BOND_MASTER. Is $BOND_MASTER ready and a bonding interface ?" >&2
+			else
+				# Bring up slave if it is the target of an allow-bondX stanza.
+				# This is useful to bring up slaves that need extra setup.
+				ifup $v --allow "$BOND_MASTER" "$slave"
+			fi
+		fi
+	done
+}
+
+setup_master()
+{
+	# Warning: the order in which we write into the sysfs files is important.
+	# Double check in drivers/net/bonding/bond_sysfs.c in the Linux kernel source tree
+	# before changing anything here.
+
+	# use_carrier can be set anytime.
+	sysfs use_carrier "$IF_BOND_USE_CARRIER"
+	# num_grat_arp can be set anytime.
+	sysfs num_grat_arp "$IF_BOND_NUM_GRAT_ARP"
+	# num_unsol_na can be set anytime.
+	sysfs num_unsol_na "$IF_BOND_NUM_UNSOL_NA"
+
+	# arp_ip_target must be set before arp_interval.
+	sysfs_add arp_ip_target "$IF_BOND_ARP_IP_TARGET"
+	sysfs arp_interval "$IF_BOND_ARP_INTERVAL"
+
+	# miimon must be set before updelay and downdelay.
+	sysfs miimon "$IF_BOND_MIIMON"
+	sysfs downdelay "$IF_BOND_DOWNDELAY"
+	sysfs updelay "$IF_BOND_UPDELAY"
+
+	# Changing ad_select requires $BOND_MASTER to be down.
+	sysfs_change_down ad_select "$IF_BOND_AD_SELECT"
+
+	# Changing mode requires $BOND_MASTER to be down.
+	# Mode should be set after miimon or arp_interval, to avoid a warning in syslog.
+	sysfs_change_down mode "$IF_BOND_MODE"
+
+	# Requires $BOND_MASTER to be down and mode to be configured
+	sysfs_change_down xmit_hash_policy "$IF_BOND_XMIT_HASH_POLICY"
+	sysfs_change_down tlb_dynamic_lb "$IF_BOND_TLB_DYNAMIC_LB"
+
+	# packets_per_slave allowed for mode balance-rr only.
+	sysfs packets_per_slave "$IF_BOND_PACKETS_PER_SLAVE"
+
+	# arp_validate must be after mode (because mode must be active-backup).
+	sysfs arp_validate "$IF_BOND_ARP_VALIDATE"
+
+	# lacp_rate must be set after mode (because mode must be 802.3ad).
+	# Changing lacp_rate requires $BOND_MASTER to be down.
+	sysfs_change_down lacp_rate "$IF_BOND_LACP_RATE"
+
+	# queue_id must be set after enslavement.
+	for iface_queue_id in $IF_BOND_QUEUE_ID ; do
+		sysfs iface_queue_id "$iface_queue_id"
+	done
+
+	# active_slave must be set after mode and after enslavement.
+	# The slave must be up and the underlying link must be up too.
+	# FIXME: We should have a way to write an empty string to active_slave, to set the active_slave to none.
+	if [ -n "$IF_BOND_ACTIVE_SLAVE" ] ; then
+		if [ "$IF_BOND_ACTIVE_SLAVE" = "none" ] ; then
+			sysfs active_slave ""
+		else
+			# Need to force interface up before. Bonding will refuse to activate a down interface.
+			if ifquery -l "$IF_BOND_ACTIVE_SLAVE" >/dev/null 2>&1 ; then
+				ifup "$IF_BOND_ACTIVE_SLAVE"
+			else
+				ip link set "$IF_BOND_ACTIVE_SLAVE" up
+			fi
+			sysfs active_slave "$IF_BOND_ACTIVE_SLAVE"
+		fi
+	fi
+}
+
+setup_primary() {
+	# primary must be set after mode (because only supported in some modes) and after enslavement.
+	# The first slave in bond-primary found in current slaves becomes the primary.
+	# If no slave in bond-primary is found, then the primary does not change.
+	for slave in $IF_BOND_PRIMARY ; do
+		slaves="/sys/class/net/$BOND_MASTER/bonding/slaves"
+		if grep -sq "\\<$slave\\>" "$slaves" ; then
+			sysfs primary "$slave"
+			break
+		fi
+	done
+
+	# primary_reselect should be set after mode (it is only supported in some modes), after enslavement
+	# and after primary. This is currently (2.6.35-rc1) not enforced by the bonding driver, but it is
+	# probably safer to do it in that order.
+	sysfs primary_reselect "$IF_BOND_PRIMARY_RESELECT"
+}
+
+setup_master_device() {
+	add_master
+	early_setup_master
+	setup_master
+	enslave_slaves
+	setup_primary
+}
+
+setup_slave_device() {
+	# Require the bond master to have an iface stanza
+	if ! ifquery -l "$IF_BOND_MASTER" >/dev/null 2>&1 ; then
+		echo "No iface stanza found for master $IF_BOND_MASTER" >&2
+		exit 1
+	fi
+
+	# Ensure the master is up or being configured
+	export IFENSLAVE_ENV_NAME="IFUPDOWN_$IF_BOND_MASTER"
+	IFUPDOWN_IF_BOND_MASTER="$(printenv "$IFENSLAVE_ENV_NAME")"
+	unset IFENSLAVE_ENV_NAME
+	if [ -z "$IFUPDOWN_IF_BOND_MASTER" ] ; then
+		ifquery --state "$IF_BOND_MASTER" >/dev/null 2>&1 || ifup "$IF_BOND_MASTER"
+	fi
+
+	# Enslave it to the master
+	ip link set "$1" down 2>/dev/null
+	if ! sysfs_add slaves "$1" 2>/dev/null ; then
+		echo "Failed to enslave $1 to $BOND_MASTER." >&2
+	fi
+
+	setup_primary
+}
+
+# Option slaves deprecated, replaced by bond-slaves, but still supported for backward compatibility.
+IF_BOND_SLAVES=${IF_BOND_SLAVES:-$IF_SLAVES}
+
+if [ -n "$IF_BOND_MASTER" ] ; then
+	# FIXME: use function arguments instead of this variable
+	BOND_MASTER="$IF_BOND_MASTER"
+	setup_slave_device "$IFACE"
+elif [ -n "$IF_BOND_SLAVES" ] || [ -n "$IF_BOND_MODE" ] ; then
+	# FIXME: use function arguments instead of these variables
+	BOND_MASTER="$IFACE"
+	BOND_SLAVES="$IF_BOND_SLAVES"
+	setup_master_device "$IFACE"
+fi
+
+exit 0

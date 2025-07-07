@@ -1,0 +1,8 @@
+[org.kde.kdecoration2]
+ButtonsOnLeft=M
+ButtonsOnRight=IAX
+library=org.kali.kali
+theme=Kali
+
+[Desktops]
+Number=2
