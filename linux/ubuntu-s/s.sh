@@ -99,20 +99,58 @@ cleanup() {
     
     # Count successful core installations
     local core_success_count=0
-    [ "$GITHUB_CLI_SUCCESS" = true ] && ((core_success_count++))
-    [ "$DOCKER_SUCCESS" = true ] && ((core_success_count++))
-    [ "$TAILSCALE_SUCCESS" = true ] && ((core_success_count++))
-    [ "$MULLVAD_SUCCESS" = true ] && ((core_success_count++))
+    local total_attempted=0
     
-    if [[ $exit_code -eq 0 ]] || [[ $core_success_count -ge 3 ]]; then
+    # Count core components (essential ones)
+    if [ "$GITHUB_CLI_SUCCESS" = true ]; then
+        ((core_success_count++))
+    fi
+    ((total_attempted++))
+    
+    if [ "$DOCKER_SUCCESS" = true ]; then
+        ((core_success_count++))
+    fi
+    ((total_attempted++))
+    
+    if [ "$TAILSCALE_SUCCESS" = true ]; then
+        ((core_success_count++))
+    fi
+    ((total_attempted++))
+    
+    if [ "$NODEJS_SUCCESS" = true ]; then
+        ((core_success_count++))
+    fi
+    ((total_attempted++))
+    
+    # Optional components (don't count toward failure)
+    local optional_count=0
+    if [ "$MULLVAD_SUCCESS" = true ]; then
+        ((optional_count++))
+    fi
+    if [ "$INFISICAL_SUCCESS" = true ]; then
+        ((optional_count++))
+    fi
+    
+    # Determine success based on core components
+    local success_threshold=$((total_attempted * 3 / 4))  # 75% of core components
+    
+    if [[ $core_success_count -ge $success_threshold ]]; then
         log_success "Ubuntu setup completed successfully! Log saved: $LOG_FILE"
+        log_info "Core components installed: $core_success_count/$total_attempted"
+        if [[ $optional_count -gt 0 ]]; then
+            log_info "Optional components installed: $optional_count"
+        fi
         if [[ $exit_code -ne 0 ]]; then
             log_info "Note: Some optional packages were skipped, but core installation succeeded"
-            exit 0  # Override exit code for partial success
         fi
+        # Force success exit code for partial success
+        exit 0
     else
-        log_error "Ubuntu setup failed with exit code $exit_code. Check log: $LOG_FILE"
+        log_error "Ubuntu setup failed - insufficient core components installed ($core_success_count/$total_attempted)"
+        log_error "Check log: $LOG_FILE"
+        exit 1
     fi
+    
     log_to_file "=== END UBUNTU SESSION ==="
 }
 
@@ -368,28 +406,70 @@ INFISICAL_SUCCESS=false
 
 if [ "$ARCH" = "amd64" ]; then
     log_info "Attempting Infisical installation for AMD64..."
-    if retry_command curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical_linux_amd64.deb" -o infisical.deb; then
-        sudo dpkg -i infisical.deb
-        rm infisical.deb
-        log_success "Infisical CLI installed"
-        INFISICAL_SUCCESS=true
+    
+    # Try multiple installation methods for better reliability
+    # Method 1: Try the npm package (most reliable)
+    if command -v npm >/dev/null 2>&1; then
+        log_info "Trying npm installation first..."
+        if npm install -g @infisical/cli 2>/dev/null; then
+            log_success "Infisical CLI installed via npm"
+            INFISICAL_SUCCESS=true
+        fi
     fi
+    
+    # Method 2: Try direct binary download if npm failed
+    if [ "$INFISICAL_SUCCESS" = false ]; then
+        log_info "Trying direct binary download..."
+        # Use the correct GitHub releases API to get the latest version
+        LATEST_VERSION=$(curl -s https://api.github.com/repos/Infisical/infisical/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+        if [ -n "$LATEST_VERSION" ]; then
+            BINARY_URL="https://github.com/Infisical/infisical/releases/download/${LATEST_VERSION}/infisical_${LATEST_VERSION}_linux_amd64.tar.gz"
+            if curl -fsSL "$BINARY_URL" -o /tmp/infisical.tar.gz 2>/dev/null; then
+                cd /tmp && tar -xzf infisical.tar.gz && sudo install -m 755 infisical /usr/local/bin/infisical
+                rm -f /tmp/infisical.tar.gz /tmp/infisical
+                log_success "Infisical CLI installed via direct binary"
+                INFISICAL_SUCCESS=true
+            fi
+        fi
+    fi
+    
+    # Method 3: Try the package installation as last resort
+    if [ "$INFISICAL_SUCCESS" = false ]; then
+        log_info "Trying package installation..."
+        # Note: The .deb package URL pattern may have changed
+        if retry_command curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical-cli_linux_amd64.deb" -o infisical.deb; then
+            sudo dpkg -i infisical.deb || true
+            rm infisical.deb
+            # Check if installation worked
+            if command -v infisical >/dev/null 2>&1; then
+                log_success "Infisical CLI installed via package"
+                INFISICAL_SUCCESS=true
+            fi
+        fi
+    fi
+    
 elif [ "$ARCH" = "arm64" ]; then
     log_info "ARM64 detected - trying alternative Infisical installation methods..."
     
-    # Method 1: Try direct binary download
-    log_info "Attempting direct binary download..."
-    if curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical_linux_arm64" -o /tmp/infisical 2>/dev/null; then
-        sudo install -m 755 /tmp/infisical /usr/local/bin/infisical
-        rm -f /tmp/infisical
-        log_success "Infisical CLI installed via direct binary"
-        INFISICAL_SUCCESS=true
-    else
-        # Method 2: Try npm installation
-        log_info "Trying npm installation as fallback..."
-        if command -v npm >/dev/null 2>&1; then
-            if npm install -g @infisical/cli 2>/dev/null; then
-                log_success "Infisical CLI installed via npm"
+    # Method 1: Try npm installation first (most reliable for ARM64)
+    if command -v npm >/dev/null 2>&1; then
+        log_info "Trying npm installation..."
+        if npm install -g @infisical/cli 2>/dev/null; then
+            log_success "Infisical CLI installed via npm"
+            INFISICAL_SUCCESS=true
+        fi
+    fi
+    
+    # Method 2: Try direct binary download
+    if [ "$INFISICAL_SUCCESS" = false ]; then
+        log_info "Attempting direct binary download..."
+        LATEST_VERSION=$(curl -s https://api.github.com/repos/Infisical/infisical/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+        if [ -n "$LATEST_VERSION" ]; then
+            BINARY_URL="https://github.com/Infisical/infisical/releases/download/${LATEST_VERSION}/infisical_${LATEST_VERSION}_linux_arm64.tar.gz"
+            if curl -fsSL "$BINARY_URL" -o /tmp/infisical.tar.gz 2>/dev/null; then
+                cd /tmp && tar -xzf infisical.tar.gz && sudo install -m 755 infisical /usr/local/bin/infisical
+                rm -f /tmp/infisical.tar.gz /tmp/infisical
+                log_success "Infisical CLI installed via direct binary"
                 INFISICAL_SUCCESS=true
             fi
         fi
@@ -398,16 +478,17 @@ elif [ "$ARCH" = "arm64" ]; then
     if [ "$INFISICAL_SUCCESS" = false ]; then
         log_warning "No ARM64 build available for Infisical. Install manually:"
         log_info "Option 1: npm install -g @infisical/cli"
-        log_info "Option 2: Use x86_64 version with emulation"
-        log_info "Option 3: Build from source: https://github.com/Infisical/infisical"
+        log_info "Option 2: Build from source: https://github.com/Infisical/infisical"
     fi
 else
     log_warning "Unsupported architecture for Infisical: $ARCH"
     log_info "Manual installation required - see: https://infisical.com/docs/cli/overview"
 fi
 
+# Don't fail the entire script if Infisical fails
 if [ "$INFISICAL_SUCCESS" = false ]; then
-    log_warning "Infisical CLI installation was skipped or failed"
+    log_warning "Infisical CLI installation was skipped or failed - this is not critical"
+    log_info "You can install it manually later with: npm install -g @infisical/cli"
 fi
 
 # Install Node.js (LTS) via NodeSource

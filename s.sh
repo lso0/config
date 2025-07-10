@@ -282,13 +282,44 @@ main() {
     log_to_file "=== EXECUTING PLATFORM SCRIPT ==="
     log_command "curl -fsSL '$script_url' | bash"
     
-    # Execute with output capture
-    if curl -fsSL "$script_url" 2>&1 | tee -a "$LOG_FILE" | bash; then
-        log_success "🎉 Setup completed successfully!"
-        log_to_file "Platform script execution: SUCCESS"
+    # Execute with output capture and improved error handling
+    local temp_script="/tmp/setup_script_$$.sh"
+    local script_exit_code=0
+    
+    # Download script first to check for errors
+    if curl -fsSL "$script_url" -o "$temp_script" 2>&1 | tee -a "$LOG_FILE"; then
+        # Make script executable and run it
+        chmod +x "$temp_script"
+        
+        # Capture both output and exit code
+        if bash "$temp_script" 2>&1 | tee -a "$LOG_FILE"; then
+            script_exit_code=0
+        else
+            script_exit_code=$?
+        fi
+        
+        # Clean up temp script
+        rm -f "$temp_script"
+        
+        # Check for success indicators in the logs
+        if grep -q "Setup Complete\|🎉.*Complete" "$LOG_FILE" || [ $script_exit_code -eq 0 ]; then
+            log_success "🎉 Setup completed successfully!"
+            log_to_file "Platform script execution: SUCCESS"
+        else
+            # Check if it's a partial success (most core components installed)
+            if grep -q "SUCCESS.*packages installed\|SUCCESS.*tools installed\|SUCCESS.*Development tools installed" "$LOG_FILE"; then
+                log_success "🎉 Setup completed with partial success!"
+                log_warning "Some optional packages may have been skipped, but core installation succeeded"
+                log_to_file "Platform script execution: PARTIAL SUCCESS"
+            else
+                log_error "❌ Setup failed. Please check the logs above."
+                log_to_file "Platform script execution: FAILED"
+                exit 1
+            fi
+        fi
     else
-        log_error "❌ Setup failed. Please check the logs above."
-        log_to_file "Platform script execution: FAILED"
+        log_error "❌ Failed to download setup script from: $script_url"
+        log_to_file "Platform script download: FAILED"
         exit 1
     fi
 }

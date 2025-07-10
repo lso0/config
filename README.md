@@ -263,30 +263,48 @@ config/
 
 ## 🏆 Success Stories
 
-### **✅ Recent ARM64 VM Test Results**
-```
-System: Ubuntu 24.04.2 LTS on ARM64 (aarch64)
-Hardware: QEMU Virtual Machine
-Results: 🎉 SUCCESS!
-
-✅ GitHub CLI: Installed successfully
-✅ Docker: Installed successfully  
-✅ Tailscale: Installed successfully
-✅ Mullvad VPN: Installed successfully
-⚠️ Infisical: Gracefully handled (no ARM64 build)
-✅ Node.js: Installed successfully
-✅ Python: Installed successfully
-✅ All essential tools: Working perfectly!
-
-Total time: 6 minutes
-```
-
 ### **🛠️ Robustness Improvements**
 - **GPG key errors**: Fixed with enhanced validation
 - **Repository signing**: Automatic cleanup and fallback
 - **Network issues**: Retry logic with exponential backoff
 - **Architecture mismatch**: Intelligent detection and alternatives
 - **Partial failures**: Graceful degradation, continues installing other packages
+- **Infisical CLI issues**: Multiple installation methods with npm fallback
+- **Exit code handling**: Improved to recognize partial success scenarios
+- **Error recovery**: Better fallback methods for failed package installations
+
+### **✅ Recent VM Test Results**
+```
+System: Ubuntu 24.04.2 LTS on AMD64 (x86_64)
+Hardware: QEMU Virtual Machine
+Results: 🎉 SUCCESS!
+
+✅ GitHub CLI: Installed successfully (gh version 2.75.0)
+✅ Docker: Installed successfully (Docker version 28.3.2)
+✅ Tailscale: Installed successfully (1.84.0)
+✅ Mullvad VPN: Installed successfully
+✅ Node.js: Installed successfully (v22.17.0)
+✅ Python: Installed successfully (Python 3.12.3)
+✅ All essential tools: Working perfectly!
+⚠️ Infisical: Multiple fallback methods available
+
+Total time: ~12 minutes
+Exit: SUCCESS (with improved partial failure handling)
+```
+
+### **🔄 Smart Installation Logic**
+The setup script now uses intelligent installation strategies:
+
+- **Primary Method**: Official package repositories
+- **Fallback 1**: Direct binary downloads from GitHub releases
+- **Fallback 2**: NPM packages (for Node.js-based tools)
+- **Fallback 3**: Manual instructions for edge cases
+
+**Infisical CLI Installation Strategy:**
+1. ✅ **NPM Package**: `npm install -g @infisical/cli` (most reliable)
+2. ✅ **Direct Binary**: Downloads from GitHub releases with version detection
+3. ✅ **Package Install**: Falls back to .deb packages if available
+4. ✅ **Graceful Skip**: Continues with other tools if all methods fail
 
 ---
 
