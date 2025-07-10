@@ -31,7 +31,10 @@ curl wgms.uk|bash
 - **Infisical** - Secret management
 - **Node.js** - JavaScript runtime
 - **Python** - Programming language
-- **Development tools** - Code editors, terminals
+- **Yazi** - Modern file manager with preview
+- **Speedtest CLI** - Internet speed testing
+- **tmux** - Terminal multiplexer
+- **Development tools** - Code editors, terminals, build tools
 
 ## 🖥️ Platform-Specific Commands
 

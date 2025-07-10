@@ -117,41 +117,49 @@ cleanup() {
     fi
     ((total_attempted++))
     
-    if [ "$NODEJS_SUCCESS" = true ]; then
+    if [ "$MULLVAD_SUCCESS" = true ]; then
         ((core_success_count++))
     fi
     ((total_attempted++))
     
-    # Optional components (don't count toward failure)
-    local optional_count=0
-    if [ "$MULLVAD_SUCCESS" = true ]; then
-        ((optional_count++))
-    fi
+    # Additional tools (not critical for exit code)
+    local additional_success_count=0
+    local additional_attempted=0
+    
     if [ "$INFISICAL_SUCCESS" = true ]; then
-        ((optional_count++))
+        ((additional_success_count++))
     fi
+    ((additional_attempted++))
     
-    # Determine success based on core components
-    local success_threshold=$((total_attempted * 3 / 4))  # 75% of core components
+    if [ "$NODE_SUCCESS" = true ]; then
+        ((additional_success_count++))
+    fi
+    ((additional_attempted++))
     
-    if [[ $core_success_count -ge $success_threshold ]]; then
-        log_success "Ubuntu setup completed successfully! Log saved: $LOG_FILE"
-        log_info "Core components installed: $core_success_count/$total_attempted"
-        if [[ $optional_count -gt 0 ]]; then
-            log_info "Optional components installed: $optional_count"
-        fi
-        if [[ $exit_code -ne 0 ]]; then
-            log_info "Note: Some optional packages were skipped, but core installation succeeded"
-        fi
-        # Force success exit code for partial success
+    if [ "$YAZI_SUCCESS" = true ]; then
+        ((additional_success_count++))
+    fi
+    ((additional_attempted++))
+    
+    if [ "$SPEEDTEST_SUCCESS" = true ]; then
+        ((additional_success_count++))
+    fi
+    ((additional_attempted++))
+    
+    # Calculate success percentage for core components
+    local success_percentage=$((core_success_count * 100 / total_attempted))
+    
+    log_to_file "Core components success: $core_success_count/$total_attempted ($success_percentage%)"
+    log_to_file "Additional tools success: $additional_success_count/$additional_attempted"
+    
+    # Exit with success if we have 75% or more core components installed
+    if [ $success_percentage -ge 75 ]; then
+        log_to_file "Setup completed successfully (≥75% core components installed)"
         exit 0
     else
-        log_error "Ubuntu setup failed - insufficient core components installed ($core_success_count/$total_attempted)"
-        log_error "Check log: $LOG_FILE"
-        exit 1
+        log_to_file "Setup partially failed (<75% core components installed)"
+        exit $exit_code
     fi
-    
-    log_to_file "=== END UBUNTU SESSION ==="
 }
 
 # Set trap for cleanup
@@ -407,86 +415,73 @@ INFISICAL_SUCCESS=false
 if [ "$ARCH" = "amd64" ]; then
     log_info "Attempting Infisical installation for AMD64..."
     
-    # Try multiple installation methods for better reliability
-    # Method 1: Try the npm package (most reliable)
+    # Configure npm for proper global package management (no sudo required)
     if command -v npm >/dev/null 2>&1; then
-        log_info "Trying npm installation first..."
+        log_info "Setting up npm global directory..."
+        
+        # Create a directory for global packages
+        mkdir -p ~/.npm-global 2>/dev/null
+        
+        # Configure npm to use the new directory
+        npm config set prefix '~/.npm-global'
+        
+        # Add to PATH if not already there
+        if ! echo "$PATH" | grep -q "$HOME/.npm-global/bin"; then
+            echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+            export PATH=~/.npm-global/bin:$PATH
+        fi
+        
+        log_info "Installing Infisical CLI via npm..."
         if npm install -g @infisical/cli 2>/dev/null; then
             log_success "Infisical CLI installed via npm"
             INFISICAL_SUCCESS=true
+        else
+            log_warning "NPM installation failed, trying fallback methods..."
         fi
     fi
     
-    # Method 2: Try direct binary download if npm failed
+    # Fallback method 1: Try direct binary download if npm failed
     if [ "$INFISICAL_SUCCESS" = false ]; then
         log_info "Trying direct binary download..."
-        # Use the correct GitHub releases API to get the latest version
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/Infisical/infisical/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
-        if [ -n "$LATEST_VERSION" ]; then
-            BINARY_URL="https://github.com/Infisical/infisical/releases/download/${LATEST_VERSION}/infisical_${LATEST_VERSION}_linux_amd64.tar.gz"
-            if curl -fsSL "$BINARY_URL" -o /tmp/infisical.tar.gz 2>/dev/null; then
-                cd /tmp && tar -xzf infisical.tar.gz && sudo install -m 755 infisical /usr/local/bin/infisical
-                rm -f /tmp/infisical.tar.gz /tmp/infisical
-                log_success "Infisical CLI installed via direct binary"
-                INFISICAL_SUCCESS=true
-            fi
-        fi
-    fi
-    
-    # Method 3: Try the package installation as last resort
-    if [ "$INFISICAL_SUCCESS" = false ]; then
-        log_info "Trying package installation..."
-        # Note: The .deb package URL pattern may have changed
-        if retry_command curl -fsSL "https://github.com/Infisical/infisical/releases/latest/download/infisical-cli_linux_amd64.deb" -o infisical.deb; then
-            sudo dpkg -i infisical.deb || true
-            rm infisical.deb
-            # Check if installation worked
-            if command -v infisical >/dev/null 2>&1; then
-                log_success "Infisical CLI installed via package"
-                INFISICAL_SUCCESS=true
-            fi
-        fi
-    fi
-    
-elif [ "$ARCH" = "arm64" ]; then
-    log_info "ARM64 detected - trying alternative Infisical installation methods..."
-    
-    # Method 1: Try npm installation first (most reliable for ARM64)
-    if command -v npm >/dev/null 2>&1; then
-        log_info "Trying npm installation..."
-        if npm install -g @infisical/cli 2>/dev/null; then
-            log_success "Infisical CLI installed via npm"
+        if curl -1sLf 'https://dl.infisical.com/cli/install.sh' | sh 2>/dev/null; then
+            log_success "Infisical CLI installed via direct download"
             INFISICAL_SUCCESS=true
         fi
     fi
     
-    # Method 2: Try direct binary download
+    # Fallback method 2: Try manual binary installation
     if [ "$INFISICAL_SUCCESS" = false ]; then
-        log_info "Attempting direct binary download..."
-        LATEST_VERSION=$(curl -s https://api.github.com/repos/Infisical/infisical/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+        log_info "Trying manual binary installation..."
+        LATEST_VERSION=$(curl -s https://api.github.com/repos/Infisical/infisical/releases/latest | grep tag_name | cut -d '"' -f 4 2>/dev/null)
         if [ -n "$LATEST_VERSION" ]; then
-            BINARY_URL="https://github.com/Infisical/infisical/releases/download/${LATEST_VERSION}/infisical_${LATEST_VERSION}_linux_arm64.tar.gz"
-            if curl -fsSL "$BINARY_URL" -o /tmp/infisical.tar.gz 2>/dev/null; then
-                cd /tmp && tar -xzf infisical.tar.gz && sudo install -m 755 infisical /usr/local/bin/infisical
-                rm -f /tmp/infisical.tar.gz /tmp/infisical
-                log_success "Infisical CLI installed via direct binary"
+            DOWNLOAD_URL="https://github.com/Infisical/infisical/releases/download/${LATEST_VERSION}/infisical_${LATEST_VERSION#v}_linux_amd64.tar.gz"
+            if curl -L "$DOWNLOAD_URL" -o /tmp/infisical.tar.gz 2>/dev/null && 
+               tar -xzf /tmp/infisical.tar.gz -C /tmp 2>/dev/null &&
+               sudo mv /tmp/infisical /usr/local/bin/ 2>/dev/null &&
+               sudo chmod +x /usr/local/bin/infisical 2>/dev/null; then
+                log_success "Infisical CLI installed via manual binary"
                 INFISICAL_SUCCESS=true
+                rm -f /tmp/infisical.tar.gz 2>/dev/null
             fi
         fi
     fi
     
+    # Final fallback: Use sudo npm install (original method)
     if [ "$INFISICAL_SUCCESS" = false ]; then
-        log_warning "No ARM64 build available for Infisical. Install manually:"
-        log_info "Option 1: npm install -g @infisical/cli"
-        log_info "Option 2: Build from source: https://github.com/Infisical/infisical"
+        log_info "Trying sudo npm installation as final fallback..."
+        if sudo npm install -g @infisical/cli 2>/dev/null; then
+            log_success "Infisical CLI installed via sudo npm (fallback)"
+            INFISICAL_SUCCESS=true
+        fi
     fi
 else
-    log_warning "Unsupported architecture for Infisical: $ARCH"
-    log_info "Manual installation required - see: https://infisical.com/docs/cli/overview"
+    log_warning "Infisical CLI: No ARM64 build available, skipping..."
 fi
 
-# Don't fail the entire script if Infisical fails
-if [ "$INFISICAL_SUCCESS" = false ]; then
+# Report results
+if [ "$INFISICAL_SUCCESS" = true ]; then
+    log_success "Infisical CLI installation completed"
+else
     log_warning "Infisical CLI installation was skipped or failed - this is not critical"
     log_info "You can install it manually later with: npm install -g @infisical/cli"
 fi
@@ -495,7 +490,7 @@ fi
 log_info "Installing Node.js LTS..."
 
 # Download and run NodeSource setup script with better error handling
-NODEJS_SUCCESS=false
+NODE_SUCCESS=false
 log_info "Downloading NodeSource setup script..."
 if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - 2>/dev/null; then
     log_success "NodeSource repository added successfully"
@@ -504,7 +499,7 @@ if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - 2>/dev/nul
     log_info "Installing Node.js package..."
     if retry_command sudo apt install -y nodejs; then
         log_success "Node.js installed: $(node --version)"
-        NODEJS_SUCCESS=true
+        NODE_SUCCESS=true
     else
         log_warning "Node.js installation failed, continuing with other packages"
     fi
@@ -513,7 +508,7 @@ else
     log_warning "Skipping Node.js installation"
 fi
 
-if [ "$NODEJS_SUCCESS" = false ]; then
+if [ "$NODE_SUCCESS" = false ]; then
     log_warning "Node.js installation was skipped or failed"
 fi
 
@@ -528,6 +523,124 @@ retry_command sudo apt install -y \
     screen \
     rsync
 log_success "Development tools installed"
+
+# Install Yazi file manager and its dependencies
+log_info "Installing Yazi file manager and dependencies..."
+YAZI_SUCCESS=false
+
+# Install Yazi dependencies first
+log_info "Installing Yazi dependencies..."
+retry_command sudo apt install -y \
+    file \
+    ffmpeg \
+    p7zip-full \
+    jq \
+    poppler-utils \
+    fd-find \
+    ripgrep \
+    fzf \
+    zoxide \
+    imagemagick \
+    xclip
+
+# For Ubuntu, fd-find is installed as fdfind, create symlink for fd
+if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+    sudo ln -sf $(which fdfind) /usr/local/bin/fd
+    log_info "Created fd symlink for fdfind"
+fi
+
+# Install Yazi via cargo (most reliable method for Ubuntu)
+if command -v cargo >/dev/null 2>&1; then
+    log_info "Installing Yazi via cargo..."
+    if cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
+        log_success "Yazi installed via cargo"
+        YAZI_SUCCESS=true
+    fi
+else
+    log_info "Cargo not available, trying alternative Yazi installation..."
+    # Try downloading binary release
+    YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep tag_name | cut -d '"' -f 4 2>/dev/null)
+    if [ -n "$YAZI_VERSION" ]; then
+        YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.tar.gz"
+        if curl -L "$YAZI_URL" -o /tmp/yazi.tar.gz 2>/dev/null && 
+           tar -xzf /tmp/yazi.tar.gz -C /tmp 2>/dev/null &&
+           sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null &&
+           sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/ya /usr/local/bin/ 2>/dev/null &&
+           sudo chmod +x /usr/local/bin/yazi /usr/local/bin/ya 2>/dev/null; then
+            log_success "Yazi installed via binary release"
+            YAZI_SUCCESS=true
+            rm -rf /tmp/yazi.tar.gz /tmp/yazi-x86_64-unknown-linux-gnu 2>/dev/null
+        fi
+    fi
+fi
+
+# Install Rust/Cargo if Yazi installation failed and we need it
+if [ "$YAZI_SUCCESS" = false ]; then
+    log_info "Installing Rust/Cargo for Yazi..."
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null; then
+        source ~/.cargo/env
+        log_success "Rust/Cargo installed"
+        
+        # Try installing Yazi again
+        log_info "Retrying Yazi installation with cargo..."
+        if cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
+            log_success "Yazi installed via cargo (after Rust installation)"
+            YAZI_SUCCESS=true
+        fi
+    fi
+fi
+
+if [ "$YAZI_SUCCESS" = true ]; then
+    log_success "Yazi file manager installation completed"
+else
+    log_warning "Yazi installation failed - you can install it manually later"
+    log_info "Manual installation: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh && cargo install --locked yazi-fm yazi-cli"
+fi
+
+# Install Speedtest CLI
+log_info "Installing Speedtest CLI..."
+SPEEDTEST_SUCCESS=false
+
+# Method 1: Try official Ookla repository
+log_info "Adding Ookla Speedtest repository..."
+if curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash 2>/dev/null; then
+    log_success "Speedtest repository added"
+    
+    # Install speedtest package
+    if retry_command sudo apt install -y speedtest; then
+        log_success "Speedtest CLI installed via official repository"
+        SPEEDTEST_SUCCESS=true
+    fi
+else
+    log_warning "Official Speedtest repository failed, trying alternative..."
+    
+    # Method 2: Try direct download
+    log_info "Trying direct speedtest binary download..."
+    if curl -L "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz" -o /tmp/speedtest.tgz 2>/dev/null &&
+       tar -xzf /tmp/speedtest.tgz -C /tmp 2>/dev/null &&
+       sudo mv /tmp/speedtest /usr/local/bin/ 2>/dev/null &&
+       sudo chmod +x /usr/local/bin/speedtest 2>/dev/null; then
+        log_success "Speedtest CLI installed via direct download"
+        SPEEDTEST_SUCCESS=true
+        rm -f /tmp/speedtest.tgz 2>/dev/null
+    fi
+fi
+
+# Method 3: Python speedtest-cli as fallback
+if [ "$SPEEDTEST_SUCCESS" = false ]; then
+    log_info "Installing Python speedtest-cli as fallback..."
+    if pip3 install speedtest-cli 2>/dev/null; then
+        log_success "Python speedtest-cli installed as fallback"
+        SPEEDTEST_SUCCESS=true
+    fi
+fi
+
+if [ "$SPEEDTEST_SUCCESS" = true ]; then
+    log_success "Speedtest CLI installation completed"
+else
+    log_warning "Speedtest CLI installation failed - you can install it manually later"
+    log_info "Manual installation: pip3 install speedtest-cli"
+fi
 
 # Cleanup
 log_info "Cleaning up..."
@@ -556,6 +669,12 @@ echo ""
 echo "5. Infisical Authentication:"
 echo "   infisical login"
 echo ""
+echo "6. Yazi File Manager:"
+echo "   yazi  # Launch file manager"
+echo ""
+echo "7. Speedtest CLI:"
+echo "   speedtest  # Test internet speed"
+echo ""
 log_info "Installation Summary:"
 echo "• Git: $(git --version 2>/dev/null || echo 'Not installed')"
 if [ "$GITHUB_CLI_SUCCESS" = true ]; then
@@ -583,16 +702,27 @@ if [ "$INFISICAL_SUCCESS" = true ]; then
 else
     echo "• Infisical CLI: SKIPPED (no ARM64 build available)"
 fi
-if [ "$NODEJS_SUCCESS" = true ]; then
+if [ "$NODE_SUCCESS" = true ]; then
     echo "• Node.js: $(node --version 2>/dev/null || echo 'Installed but version check failed')"
 else
     echo "• Node.js: SKIPPED (repository issue)"
 fi
 echo "• Python: $(python3 --version 2>/dev/null || echo 'Not installed')"
+if [ "$YAZI_SUCCESS" = true ]; then
+    echo "• Yazi file manager: $(yazi --version 2>/dev/null || echo 'Installed')"
+else
+    echo "• Yazi file manager: SKIPPED (installation failed)"
+fi
+if [ "$SPEEDTEST_SUCCESS" = true ]; then
+    echo "• Speedtest CLI: $(speedtest --version 2>/dev/null || echo 'Installed')"
+else
+    echo "• Speedtest CLI: SKIPPED (installation failed)"
+fi
+echo "• tmux: $(tmux -V 2>/dev/null || echo 'Installed')"
 echo ""
 
 # Show what needs manual attention
-if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODEJS_SUCCESS" = false ]; then
+if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
     log_warning "Some packages were skipped due to compatibility or repository issues."
     log_info "These can be installed manually later using their official installation methods."
 fi
