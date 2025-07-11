@@ -425,16 +425,23 @@ if [ "$ARCH" = "amd64" ]; then
         # Configure npm to use the new directory
         npm config set prefix '~/.npm-global'
         
-        # Add to PATH if not already there
+        # Add to PATH both for current session and future sessions
         if ! echo "$PATH" | grep -q "$HOME/.npm-global/bin"; then
+            export PATH="$HOME/.npm-global/bin:$PATH"
             echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
-            export PATH=~/.npm-global/bin:$PATH
         fi
         
         log_info "Installing Infisical CLI via npm..."
         if npm install -g @infisical/cli 2>/dev/null; then
             log_success "Infisical CLI installed via npm"
-            INFISICAL_SUCCESS=true
+            
+            # Verify installation
+            if command -v infisical >/dev/null 2>&1; then
+                log_success "Infisical CLI verified and working"
+                INFISICAL_SUCCESS=true
+            else
+                log_warning "Infisical installed but not in PATH, trying alternatives..."
+            fi
         else
             log_warning "NPM installation failed, trying fallback methods..."
         fi
@@ -481,6 +488,10 @@ fi
 # Report results
 if [ "$INFISICAL_SUCCESS" = true ]; then
     log_success "Infisical CLI installation completed"
+    # Final verification
+    if command -v infisical >/dev/null 2>&1; then
+        log_success "Infisical CLI verified: $(infisical --version 2>/dev/null || echo 'Available')"
+    fi
 else
     log_warning "Infisical CLI installation was skipped or failed - this is not critical"
     log_info "You can install it manually later with: npm install -g @infisical/cli"
@@ -549,42 +560,56 @@ if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
     log_info "Created fd symlink for fdfind"
 fi
 
-# Install Yazi via cargo (most reliable method for Ubuntu)
-if command -v cargo >/dev/null 2>&1; then
-    log_info "Installing Yazi via cargo..."
-    if cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
-        log_success "Yazi installed via cargo"
+# Method 1: Try downloading binary release (fastest and most reliable)
+log_info "Trying Yazi binary download..."
+YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep tag_name | cut -d '"' -f 4 2>/dev/null)
+if [ -n "$YAZI_VERSION" ]; then
+    YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.tar.gz"
+    if curl -L "$YAZI_URL" -o /tmp/yazi.tar.gz 2>/dev/null && 
+       tar -xzf /tmp/yazi.tar.gz -C /tmp 2>/dev/null &&
+       sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null &&
+       sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/ya /usr/local/bin/ 2>/dev/null &&
+       sudo chmod +x /usr/local/bin/yazi /usr/local/bin/ya 2>/dev/null; then
+        log_success "Yazi installed via binary release"
         YAZI_SUCCESS=true
+        rm -rf /tmp/yazi.tar.gz /tmp/yazi-x86_64-unknown-linux-gnu 2>/dev/null
     fi
-else
-    log_info "Cargo not available, trying alternative Yazi installation..."
-    # Try downloading binary release
-    YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep tag_name | cut -d '"' -f 4 2>/dev/null)
-    if [ -n "$YAZI_VERSION" ]; then
-        YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.tar.gz"
-        if curl -L "$YAZI_URL" -o /tmp/yazi.tar.gz 2>/dev/null && 
-           tar -xzf /tmp/yazi.tar.gz -C /tmp 2>/dev/null &&
-           sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null &&
-           sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/ya /usr/local/bin/ 2>/dev/null &&
-           sudo chmod +x /usr/local/bin/yazi /usr/local/bin/ya 2>/dev/null; then
-            log_success "Yazi installed via binary release"
+fi
+
+# Method 2: Install Rust and try cargo installation if binary failed
+if [ "$YAZI_SUCCESS" = false ]; then
+    log_info "Binary installation failed, trying Rust/Cargo method..."
+    
+    # Check if cargo is available, if not install Rust
+    if ! command -v cargo >/dev/null 2>&1; then
+        log_info "Installing Rust/Cargo for Yazi..."
+        if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null; then
+            # Source Rust environment for current session
+            source ~/.cargo/env 2>/dev/null || export PATH="$HOME/.cargo/bin:$PATH"
+            log_success "Rust/Cargo installed"
+        else
+            log_warning "Failed to install Rust/Cargo"
+        fi
+    fi
+    
+    # Try cargo installation if cargo is now available
+    if command -v cargo >/dev/null 2>&1; then
+        log_info "Installing Yazi via cargo..."
+        if timeout 300 cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
+            log_success "Yazi installed via cargo"
             YAZI_SUCCESS=true
-            rm -rf /tmp/yazi.tar.gz /tmp/yazi-x86_64-unknown-linux-gnu 2>/dev/null
+        else
+            log_warning "Cargo installation failed or timed out"
         fi
     fi
 fi
 
-# Install Rust/Cargo if Yazi installation failed and we need it
+# Method 3: Try snap installation as final fallback
 if [ "$YAZI_SUCCESS" = false ]; then
-    log_info "Installing Rust/Cargo for Yazi..."
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null; then
-        source ~/.cargo/env
-        log_success "Rust/Cargo installed"
-        
-        # Try installing Yazi again
-        log_info "Retrying Yazi installation with cargo..."
-        if cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
-            log_success "Yazi installed via cargo (after Rust installation)"
+    log_info "Trying snap installation as fallback..."
+    if command -v snap >/dev/null 2>&1; then
+        if sudo snap install yazi 2>/dev/null; then
+            log_success "Yazi installed via snap"
             YAZI_SUCCESS=true
         fi
     fi
@@ -592,9 +617,15 @@ fi
 
 if [ "$YAZI_SUCCESS" = true ]; then
     log_success "Yazi file manager installation completed"
+    # Verify installation
+    if command -v yazi >/dev/null 2>&1; then
+        log_success "Yazi verified: $(yazi --version 2>/dev/null || echo 'Available')"
+    fi
 else
     log_warning "Yazi installation failed - you can install it manually later"
-    log_info "Manual installation: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh && cargo install --locked yazi-fm yazi-cli"
+    log_info "Manual installation options:"
+    log_info "1. Via snap: sudo snap install yazi"
+    log_info "2. Via cargo: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh && cargo install --locked yazi-fm yazi-cli"
 fi
 
 # Install Speedtest CLI
@@ -613,10 +644,14 @@ if curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/scri
     fi
 else
     log_warning "Official Speedtest repository failed, trying alternative..."
-    
-    # Method 2: Try direct download
+fi
+
+# Method 2: Try direct download if repository failed
+if [ "$SPEEDTEST_SUCCESS" = false ]; then
     log_info "Trying direct speedtest binary download..."
-    if curl -L "https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz" -o /tmp/speedtest.tgz 2>/dev/null &&
+    # Get the latest version from the official site
+    SPEEDTEST_URL="https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz"
+    if curl -L "$SPEEDTEST_URL" -o /tmp/speedtest.tgz 2>/dev/null &&
        tar -xzf /tmp/speedtest.tgz -C /tmp 2>/dev/null &&
        sudo mv /tmp/speedtest /usr/local/bin/ 2>/dev/null &&
        sudo chmod +x /usr/local/bin/speedtest 2>/dev/null; then
@@ -632,14 +667,34 @@ if [ "$SPEEDTEST_SUCCESS" = false ]; then
     if pip3 install speedtest-cli 2>/dev/null; then
         log_success "Python speedtest-cli installed as fallback"
         SPEEDTEST_SUCCESS=true
+        log_info "Note: Use 'speedtest-cli' command (not 'speedtest')"
+    fi
+fi
+
+# Method 4: Try snap installation as final fallback
+if [ "$SPEEDTEST_SUCCESS" = false ]; then
+    log_info "Trying snap installation as final fallback..."
+    if command -v snap >/dev/null 2>&1; then
+        if sudo snap install speedtest-cli 2>/dev/null; then
+            log_success "Speedtest CLI installed via snap"
+            SPEEDTEST_SUCCESS=true
+        fi
     fi
 fi
 
 if [ "$SPEEDTEST_SUCCESS" = true ]; then
     log_success "Speedtest CLI installation completed"
+    # Verify installation
+    if command -v speedtest >/dev/null 2>&1; then
+        log_success "Speedtest CLI verified: $(speedtest --version 2>/dev/null || echo 'Available')"
+    elif command -v speedtest-cli >/dev/null 2>&1; then
+        log_success "Python speedtest-cli verified: $(speedtest-cli --version 2>/dev/null || echo 'Available')"
+    fi
 else
     log_warning "Speedtest CLI installation failed - you can install it manually later"
-    log_info "Manual installation: pip3 install speedtest-cli"
+    log_info "Manual installation options:"
+    log_info "1. Via pip: pip3 install speedtest-cli"
+    log_info "2. Via snap: sudo snap install speedtest-cli"
 fi
 
 # Cleanup
