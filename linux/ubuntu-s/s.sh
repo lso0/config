@@ -544,6 +544,187 @@ retry_command sudo apt install -y \
     rsync
 log_success "Development tools installed"
 
+# Install Google Cloud CLI
+log_info "Installing Google Cloud CLI..."
+GCLOUD_SUCCESS=false
+
+# Add Google Cloud SDK repository
+log_info "Adding Google Cloud SDK repository..."
+if curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg; then
+    sudo chmod 644 /usr/share/keyrings/cloud.google.gpg
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+    
+    # Update package lists
+    log_info "Updating package lists after adding Google Cloud SDK repository..."
+    if retry_command sudo apt update; then
+        log_success "Package lists updated successfully"
+        
+        # Install Google Cloud CLI
+        log_info "Installing Google Cloud CLI package..."
+        if retry_command sudo apt install -y google-cloud-cli; then
+            log_success "Google Cloud CLI installed successfully"
+            GCLOUD_SUCCESS=true
+        else
+            log_warning "Google Cloud CLI installation failed, continuing with other packages"
+        fi
+    else
+        log_error "Failed to update package lists - removing Google Cloud SDK repository"
+        sudo rm -f /etc/apt/sources.list.d/google-cloud-sdk.list /usr/share/keyrings/cloud.google.gpg
+        retry_command sudo apt update
+        log_warning "Skipping Google Cloud CLI installation due to repository issues"
+    fi
+else
+    log_error "Failed to download Google Cloud SDK GPG key"
+    log_warning "Skipping Google Cloud CLI installation"
+fi
+
+if [ "$GCLOUD_SUCCESS" = false ]; then
+    log_warning "Google Cloud CLI installation was skipped or failed"
+    log_info "You can install it manually later with: curl https://sdk.cloud.google.com | bash"
+fi
+
+# Install QEMU virtualization
+log_info "Installing QEMU virtualization..."
+QEMU_SUCCESS=false
+
+if retry_command sudo apt install -y qemu-kvm qemu-system qemu-utils libvirt-daemon-system libvirt-clients bridge-utils virt-manager; then
+    log_success "QEMU and virtualization tools installed"
+    
+    # Add user to libvirt groups
+    sudo usermod -aG libvirt,kvm $(whoami)
+    log_info "Added user to libvirt and kvm groups"
+    QEMU_SUCCESS=true
+else
+    log_warning "QEMU installation failed, continuing with other packages"
+fi
+
+if [ "$QEMU_SUCCESS" = false ]; then
+    log_warning "QEMU installation was skipped or failed"
+fi
+
+# Install ZSH and plugins
+log_info "Installing ZSH and plugins..."
+ZSH_SUCCESS=false
+
+# Install ZSH first
+if retry_command sudo apt install -y zsh; then
+    log_success "ZSH installed"
+    
+    # Install ZSH plugins via apt (more reliable than git)
+    log_info "Installing ZSH plugins..."
+    if retry_command sudo apt install -y zsh-autosuggestions zsh-syntax-highlighting; then
+        log_success "ZSH plugins installed via apt"
+        ZSH_SUCCESS=true
+    else
+        log_warning "ZSH plugins installation via apt failed, trying manual installation..."
+    fi
+    
+    # Fallback: Install plugins manually if apt failed
+    if [ "$ZSH_SUCCESS" = false ]; then
+        log_info "Installing ZSH plugins manually..."
+        ZSH_CUSTOM_DIR="$HOME/.oh-my-zsh/custom"
+        
+        # Create custom directory if it doesn't exist
+        mkdir -p "$ZSH_CUSTOM_DIR/plugins" 2>/dev/null
+        
+        # Install zsh-autosuggestions
+        if [ ! -d "$ZSH_CUSTOM_DIR/plugins/zsh-autosuggestions" ]; then
+            if git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM_DIR/plugins/zsh-autosuggestions" 2>/dev/null; then
+                log_success "zsh-autosuggestions installed manually"
+            fi
+        fi
+        
+        # Install zsh-syntax-highlighting
+        if [ ! -d "$ZSH_CUSTOM_DIR/plugins/zsh-syntax-highlighting" ]; then
+            if git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM_DIR/plugins/zsh-syntax-highlighting" 2>/dev/null; then
+                log_success "zsh-syntax-highlighting installed manually"
+            fi
+        fi
+        
+        # Install zsh-autocomplete
+        if [ ! -d "$ZSH_CUSTOM_DIR/plugins/zsh-autocomplete" ]; then
+            if git clone --depth 1 -- https://github.com/marlonrichert/zsh-autocomplete.git "$ZSH_CUSTOM_DIR/plugins/zsh-autocomplete" 2>/dev/null; then
+                log_success "zsh-autocomplete installed manually"
+            fi
+        fi
+        
+        ZSH_SUCCESS=true
+    fi
+    
+    # Create a basic .zshrc configuration if it doesn't exist
+    if [ ! -f ~/.zshrc ]; then
+        log_info "Creating basic .zshrc configuration..."
+        cat > ~/.zshrc << 'EOF'
+# Basic ZSH configuration
+export ZSH="$HOME/.oh-my-zsh"
+
+# Enable plugins
+plugins=(
+    git
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    zsh-autocomplete
+)
+
+# Load Oh My Zsh if available
+if [ -f "$ZSH/oh-my-zsh.sh" ]; then
+    source $ZSH/oh-my-zsh.sh
+fi
+
+# Load system-wide plugins if installed via apt
+if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+# Load manually installed plugins
+if [ -f ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+if [ -f ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+if [ -f ~/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh ]; then
+    source ~/.oh-my-zsh/custom/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+fi
+
+# Initialize zoxide if available
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
+
+# Common aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias grep='grep --color=auto'
+
+# Set default editor
+export EDITOR=vim
+
+# History configuration
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory
+EOF
+        log_success "Basic .zshrc configuration created"
+    fi
+    
+    # Suggest changing default shell
+    log_info "To make ZSH your default shell, run: chsh -s $(which zsh)"
+else
+    log_warning "ZSH installation failed"
+fi
+
+if [ "$ZSH_SUCCESS" = false ]; then
+    log_warning "ZSH and plugins installation was skipped or failed"
+fi
+
 # Install Yazi file manager and its dependencies
 log_info "Installing Yazi file manager and dependencies..."
 YAZI_SUCCESS=false
@@ -824,14 +1005,28 @@ echo ""
 echo "4. Mullvad VPN Configuration:"
 echo "   mullvad account login <account-number>"
 echo ""
-echo "5. Infisical Authentication:"
+echo "5. Google Cloud CLI Authentication:"
+echo "   gcloud auth login"
+echo "   gcloud config set project YOUR_PROJECT_ID"
+echo ""
+echo "6. ZSH as Default Shell (optional):"
+echo "   chsh -s \$(which zsh)  # Then logout/login"
+echo ""
+echo "7. QEMU/KVM Virtualization:"
+echo "   # Groups added - logout/login to use without sudo"
+echo "   virt-manager  # GUI for managing VMs"
+echo ""
+echo "8. Infisical Authentication:"
 echo "   infisical login"
 echo ""
-echo "6. Yazi File Manager:"
+echo "9. Yazi File Manager:"
 echo "   yazi  # Launch file manager"
 echo ""
-echo "7. Speedtest CLI:"
-echo "   speedtest  # Test internet speed"
+echo "10. Speedtest CLI:"
+echo "    speedtest  # Test internet speed"
+echo ""
+echo "11. Zoxide (smart cd):"
+echo "    z <directory_name>  # Jump to frequently used directories"
 echo ""
 log_info "Installation Summary:"
 echo "• Git: $(git --version 2>/dev/null || echo 'Not installed')"
@@ -855,6 +1050,21 @@ if [ "$MULLVAD_SUCCESS" = true ]; then
 else
     echo "• Mullvad VPN: SKIPPED (GPG key or repository issue)"
 fi
+if [ "$GCLOUD_SUCCESS" = true ]; then
+    echo "• Google Cloud CLI: $(gcloud --version 2>/dev/null | head -n1 || echo 'Installed')"
+else
+    echo "• Google Cloud CLI: SKIPPED (GPG key or repository issue)"
+fi
+if [ "$QEMU_SUCCESS" = true ]; then
+    echo "• QEMU: $(qemu-system-x86_64 --version 2>/dev/null | head -n1 || echo 'Installed')"
+else
+    echo "• QEMU: SKIPPED (installation failed)"
+fi
+if [ "$ZSH_SUCCESS" = true ]; then
+    echo "• ZSH with plugins: $(zsh --version 2>/dev/null || echo 'Installed')"
+else
+    echo "• ZSH with plugins: SKIPPED (installation failed)"
+fi
 if [ "$INFISICAL_SUCCESS" = true ]; then
     echo "• Infisical CLI: Installed"
 else
@@ -866,6 +1076,7 @@ else
     echo "• Node.js: SKIPPED (repository issue)"
 fi
 echo "• Python: $(python3 --version 2>/dev/null || echo 'Not installed')"
+echo "• Zoxide: $(zoxide --version 2>/dev/null || echo 'Installed')"
 if [ "$YAZI_SUCCESS" = true ]; then
     echo "• Yazi file manager: $(yazi --version 2>/dev/null || echo 'Installed')"
 else
@@ -880,7 +1091,7 @@ echo "• tmux: $(tmux -V 2>/dev/null || echo 'Installed')"
 echo ""
 
 # Show what needs manual attention
-if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
+if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$GCLOUD_SUCCESS" = false ] || [ "$QEMU_SUCCESS" = false ] || [ "$ZSH_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
     log_warning "Some packages were skipped due to compatibility or repository issues."
     log_info "These can be installed manually later using their official installation methods."
 fi
