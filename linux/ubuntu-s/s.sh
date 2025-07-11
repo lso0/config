@@ -725,6 +725,321 @@ if [ "$ZSH_SUCCESS" = false ]; then
     log_warning "ZSH and plugins installation was skipped or failed"
 fi
 
+# Install Browser Automation Tools
+log_info "Installing browser automation tools..."
+BROWSER_AUTOMATION_SUCCESS=false
+
+# Install core browser automation packages
+log_info "Installing Chromium and automation dependencies..."
+if retry_command sudo apt install -y chromium-browser xvfb fonts-liberation libxss1 libappindicator3-1 libindicator7 xdg-utils; then
+    log_success "Chromium and X11 dependencies installed"
+    
+    # Install ChromeDriver
+    log_info "Installing ChromeDriver..."
+    CHROMEDRIVER_SUCCESS=false
+    
+    # Method 1: Try installing via apt
+    if retry_command sudo apt install -y chromium-chromedriver; then
+        log_success "ChromeDriver installed via apt"
+        CHROMEDRIVER_SUCCESS=true
+    else
+        # Method 2: Manual download and installation
+        log_info "Downloading ChromeDriver manually..."
+        CHROME_VERSION=$(chromium-browser --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
+        if [ -n "$CHROME_VERSION" ]; then
+            CHROME_MAJOR_VERSION=$(echo "$CHROME_VERSION" | cut -d. -f1)
+            CHROMEDRIVER_URL="https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip"
+            
+            if curl -L "$CHROMEDRIVER_URL" -o /tmp/chromedriver.zip 2>/dev/null &&
+               unzip -q /tmp/chromedriver.zip -d /tmp 2>/dev/null &&
+               sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/ 2>/dev/null &&
+               sudo chmod +x /usr/local/bin/chromedriver 2>/dev/null; then
+                log_success "ChromeDriver installed manually"
+                CHROMEDRIVER_SUCCESS=true
+                rm -rf /tmp/chromedriver.zip /tmp/chromedriver-linux64 2>/dev/null
+            else
+                log_warning "ChromeDriver manual installation failed"
+            fi
+        fi
+    fi
+    
+    # Install Python automation packages
+    log_info "Installing Python automation packages..."
+    PYTHON_AUTOMATION_SUCCESS=false
+    if pip3 install selenium webdriver-manager pyvirtualdisplay pandas beautifulsoup4 requests undetected-chromedriver 2>/dev/null; then
+        log_success "Python automation packages installed"
+        PYTHON_AUTOMATION_SUCCESS=true
+    else
+        log_warning "Some Python packages may have failed to install"
+    fi
+    
+    # Install Node.js automation packages (Puppeteer)
+    log_info "Installing Node.js automation packages..."
+    NODEJS_AUTOMATION_SUCCESS=false
+    if command -v npm >/dev/null 2>&1; then
+        # Install Puppeteer globally
+        if npm install -g puppeteer playwright 2>/dev/null; then
+            log_success "Puppeteer and Playwright installed globally"
+            NODEJS_AUTOMATION_SUCCESS=true
+        else
+            log_warning "Node.js automation packages installation failed"
+        fi
+    else
+        log_warning "npm not available - skipping Node.js automation packages"
+    fi
+    
+    # Create browser automation directories and example scripts
+    log_info "Setting up browser automation environment..."
+    mkdir -p ~/browser_automation/{chrome_profiles,scripts,downloads} 2>/dev/null
+    mkdir -p ~/browser_automation/chrome_profiles/{work,personal,automation,testing} 2>/dev/null
+    
+    # Create example Puppeteer script
+    cat > ~/browser_automation/scripts/puppeteer_example.js << 'EOF'
+const puppeteer = require('puppeteer');
+
+const profiles = [
+  { name: 'work', port: 9222 },
+  { name: 'personal', port: 9223 },
+  { name: 'automation', port: 9224 }
+];
+
+async function runProfile(profile) {
+  console.log(`[${profile.name}] Starting browser automation...`);
+  
+  const browser = await puppeteer.launch({
+    headless: 'new', // Use new headless mode
+    userDataDir: `../chrome_profiles/${profile.name}`,
+    args: [
+      `--remote-debugging-port=${profile.port}`,
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu'
+    ]
+  });
+
+  const page = await browser.newPage();
+  
+  // Set user agent to avoid detection
+  await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+  
+  // Example automation
+  await page.goto('https://httpbin.org/user-agent');
+  const title = await page.title();
+  console.log(`[${profile.name}] Page title: ${title}`);
+  
+  // Take screenshot
+  await page.screenshot({ 
+    path: `../downloads/${profile.name}_screenshot.png`,
+    fullPage: true 
+  });
+  
+  await browser.close();
+  console.log(`[${profile.name}] Automation completed`);
+}
+
+// Run automation for all profiles
+async function runAll() {
+  for (const profile of profiles) {
+    await runProfile(profile);
+  }
+}
+
+runAll().catch(console.error);
+EOF
+
+    # Create example Python script with undetected ChromeDriver
+    cat > ~/browser_automation/scripts/undetected_selenium_example.py << 'EOF'
+#!/usr/bin/env python3
+import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import os
+
+def create_undetected_driver(profile_name):
+    """Create an undetected ChromeDriver instance"""
+    profile_path = f"../chrome_profiles/{profile_name}"
+    
+    # Create profile directory if it doesn't exist
+    os.makedirs(profile_path, exist_ok=True)
+    
+    options = uc.ChromeOptions()
+    options.add_argument(f"--user-data-dir={profile_path}")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    
+    # For headless mode (uncomment if needed)
+    # options.add_argument("--headless=new")
+    
+    driver = uc.Chrome(options=options)
+    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    
+    return driver
+
+def test_automation():
+    """Example automation with undetected ChromeDriver"""
+    profiles = ['work', 'personal', 'automation']
+    
+    for profile in profiles:
+        print(f"[{profile}] Starting undetected browser automation...")
+        
+        driver = create_undetected_driver(profile)
+        
+        try:
+            # Test anti-bot detection
+            driver.get("https://bot.sannysoft.com/")
+            time.sleep(3)
+            
+            # Take screenshot
+            screenshot_path = f"../downloads/{profile}_bot_test.png"
+            driver.save_screenshot(screenshot_path)
+            print(f"[{profile}] Screenshot saved: {screenshot_path}")
+            
+            # Check if detected as bot
+            page_source = driver.page_source
+            if "You are a bot" in page_source:
+                print(f"[{profile}] ❌ Detected as bot")
+            else:
+                print(f"[{profile}] ✅ Not detected as bot")
+                
+        except Exception as e:
+            print(f"[{profile}] Error: {e}")
+        finally:
+            driver.quit()
+            print(f"[{profile}] Browser closed")
+
+if __name__ == "__main__":
+    test_automation()
+EOF
+
+    # Create XVFB wrapper script
+    cat > ~/browser_automation/scripts/xvfb_run.sh << 'EOF'
+#!/bin/bash
+# XVFB wrapper for running GUI applications headlessly
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <command> [args...]"
+    echo "Example: $0 python3 selenium_script.py"
+    exit 1
+fi
+
+echo "Starting virtual display..."
+exec xvfb-run -a --server-args="-screen 0 1920x1080x24 -dpi 96" "$@"
+EOF
+
+    # Create profile initializer script
+    cat > ~/browser_automation/scripts/init_profiles.sh << 'EOF'
+#!/bin/bash
+# Initialize Chrome profiles without GUI
+
+PROFILES=("work" "personal" "automation" "testing")
+
+for profile in "${PROFILES[@]}"; do
+    echo "Initializing profile: $profile"
+    
+    # Create profile directory
+    mkdir -p "../chrome_profiles/$profile"
+    
+    # Start temporary instance to create profile structure
+    chromium-browser \
+        --user-data-dir="../chrome_profiles/$profile" \
+        --headless=new \
+        --no-first-run \
+        --no-default-browser-check \
+        --disable-default-apps \
+        --remote-debugging-port=$((9222 + $(echo "$profile" | wc -c))) \
+        about:blank &
+    
+    # Wait for profile creation
+    sleep 5
+    
+    # Kill the instance
+    pkill -f "user-data-dir=.*chrome_profiles/$profile"
+    
+    echo "Profile $profile initialized"
+done
+
+echo "All profiles initialized successfully!"
+EOF
+
+    # Make scripts executable
+    chmod +x ~/browser_automation/scripts/*.sh
+    chmod +x ~/browser_automation/scripts/*.py
+    
+    # Create README with usage instructions
+    cat > ~/browser_automation/README.md << 'EOF'
+# Browser Automation Setup
+
+## Quick Start
+
+### 1. Initialize Chrome Profiles
+```bash
+cd ~/browser_automation/scripts
+./init_profiles.sh
+```
+
+### 2. Run Puppeteer Automation
+```bash
+cd ~/browser_automation/scripts
+node puppeteer_example.js
+```
+
+### 3. Run Undetected Selenium
+```bash
+cd ~/browser_automation/scripts
+python3 undetected_selenium_example.py
+```
+
+### 4. Run with Virtual Display (if needed)
+```bash
+cd ~/browser_automation/scripts
+./xvfb_run.sh python3 undetected_selenium_example.py
+```
+
+## Directory Structure
+- `chrome_profiles/`: Browser profiles (work, personal, automation, testing)
+- `scripts/`: Automation scripts and utilities
+- `downloads/`: Screenshots and downloaded files
+
+## Available Tools
+- **Chromium**: Headless browser engine
+- **ChromeDriver**: WebDriver for Selenium
+- **Puppeteer**: Node.js browser automation
+- **Playwright**: Modern browser automation
+- **Undetected ChromeDriver**: Anti-detection Selenium
+- **XVFB**: Virtual display for GUI-required scenarios
+
+## Tips
+- Use undetected ChromeDriver for sites with bot detection
+- Enable headless mode by uncommenting headless options
+- Profiles persist data between runs
+- Screenshots and downloads go to `downloads/` folder
+EOF
+
+    log_success "Browser automation environment set up"
+    log_info "Automation scripts created in ~/browser_automation/"
+    
+    BROWSER_AUTOMATION_SUCCESS=true
+else
+    log_warning "Browser automation tools installation failed"
+fi
+
+if [ "$BROWSER_AUTOMATION_SUCCESS" = true ]; then
+    log_success "Browser automation tools installation completed"
+    log_info "Example scripts available in ~/browser_automation/scripts/"
+    log_info "Run 'cd ~/browser_automation && cat README.md' for usage instructions"
+else
+    log_warning "Browser automation tools installation was skipped or failed"
+fi
+
 # Install Yazi file manager and its dependencies
 log_info "Installing Yazi file manager and dependencies..."
 YAZI_SUCCESS=false
@@ -1028,6 +1343,12 @@ echo ""
 echo "11. Zoxide (smart cd):"
 echo "    z <directory_name>  # Jump to frequently used directories"
 echo ""
+echo "12. Browser Automation:"
+echo "    cd ~/browser_automation/scripts"
+echo "    ./init_profiles.sh  # Initialize Chrome profiles"
+echo "    node puppeteer_example.js  # Run Puppeteer automation"
+echo "    python3 undetected_selenium_example.py  # Anti-detection automation"
+echo ""
 log_info "Installation Summary:"
 echo "• Git: $(git --version 2>/dev/null || echo 'Not installed')"
 if [ "$GITHUB_CLI_SUCCESS" = true ]; then
@@ -1065,6 +1386,11 @@ if [ "$ZSH_SUCCESS" = true ]; then
 else
     echo "• ZSH with plugins: SKIPPED (installation failed)"
 fi
+if [ "$BROWSER_AUTOMATION_SUCCESS" = true ]; then
+    echo "• Browser Automation: Chromium + ChromeDriver + Puppeteer + Undetected ChromeDriver"
+else
+    echo "• Browser Automation: SKIPPED (installation failed)"
+fi
 if [ "$INFISICAL_SUCCESS" = true ]; then
     echo "• Infisical CLI: Installed"
 else
@@ -1091,7 +1417,7 @@ echo "• tmux: $(tmux -V 2>/dev/null || echo 'Installed')"
 echo ""
 
 # Show what needs manual attention
-if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$GCLOUD_SUCCESS" = false ] || [ "$QEMU_SUCCESS" = false ] || [ "$ZSH_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
+if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$GCLOUD_SUCCESS" = false ] || [ "$QEMU_SUCCESS" = false ] || [ "$ZSH_SUCCESS" = false ] || [ "$BROWSER_AUTOMATION_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
     log_warning "Some packages were skipped due to compatibility or repository issues."
     log_info "These can be installed manually later using their official installation methods."
 fi
