@@ -405,7 +405,33 @@ if [ "$MULLVAD_SUCCESS" = false ]; then
     log_warning "Mullvad VPN installation was skipped or failed"
 fi
 
-# Install Infisical CLI
+# Install Node.js (LTS) via NodeSource
+log_info "Installing Node.js LTS..."
+
+# Download and run NodeSource setup script with better error handling
+NODE_SUCCESS=false
+log_info "Downloading NodeSource setup script..."
+if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - 2>/dev/null; then
+    log_success "NodeSource repository added successfully"
+    
+    # Install Node.js
+    log_info "Installing Node.js package..."
+    if retry_command sudo apt install -y nodejs; then
+        log_success "Node.js installed: $(node --version)"
+        NODE_SUCCESS=true
+    else
+        log_warning "Node.js installation failed, continuing with other packages"
+    fi
+else
+    log_error "Failed to add NodeSource repository"
+    log_warning "Skipping Node.js installation"
+fi
+
+if [ "$NODE_SUCCESS" = false ]; then
+    log_warning "Node.js installation was skipped or failed"
+fi
+
+# Install Infisical CLI (after Node.js is available)
 log_info "Installing Infisical CLI..."
 
 # Check architecture and try different installation methods
@@ -497,32 +523,6 @@ else
     log_info "You can install it manually later with: npm install -g @infisical/cli"
 fi
 
-# Install Node.js (LTS) via NodeSource
-log_info "Installing Node.js LTS..."
-
-# Download and run NodeSource setup script with better error handling
-NODE_SUCCESS=false
-log_info "Downloading NodeSource setup script..."
-if curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - 2>/dev/null; then
-    log_success "NodeSource repository added successfully"
-    
-    # Install Node.js
-    log_info "Installing Node.js package..."
-    if retry_command sudo apt install -y nodejs; then
-        log_success "Node.js installed: $(node --version)"
-        NODE_SUCCESS=true
-    else
-        log_warning "Node.js installation failed, continuing with other packages"
-    fi
-else
-    log_error "Failed to add NodeSource repository"
-    log_warning "Skipping Node.js installation"
-fi
-
-if [ "$NODE_SUCCESS" = false ]; then
-    log_warning "Node.js installation was skipped or failed"
-fi
-
 # Install common development tools
 log_info "Installing additional development tools..."
 retry_command sudo apt install -y \
@@ -564,15 +564,39 @@ fi
 log_info "Trying Yazi binary download..."
 YAZI_VERSION=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest | grep tag_name | cut -d '"' -f 4 2>/dev/null)
 if [ -n "$YAZI_VERSION" ]; then
-    YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.tar.gz"
+    # Try different binary variants
+    ARCH_NAME=$(uname -m)
+    case "$ARCH_NAME" in
+        x86_64)
+            YAZI_ARCH="x86_64-unknown-linux-gnu"
+            ;;
+        aarch64)
+            YAZI_ARCH="aarch64-unknown-linux-gnu"
+            ;;
+        *)
+            YAZI_ARCH="x86_64-unknown-linux-gnu"  # Default fallback
+            ;;
+    esac
+    
+    YAZI_URL="https://github.com/sxyazi/yazi/releases/download/${YAZI_VERSION}/yazi-${YAZI_ARCH}.tar.gz"
+    log_info "Downloading Yazi ${YAZI_VERSION} for ${YAZI_ARCH}..."
+    
     if curl -L "$YAZI_URL" -o /tmp/yazi.tar.gz 2>/dev/null && 
-       tar -xzf /tmp/yazi.tar.gz -C /tmp 2>/dev/null &&
-       sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/ 2>/dev/null &&
-       sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/ya /usr/local/bin/ 2>/dev/null &&
-       sudo chmod +x /usr/local/bin/yazi /usr/local/bin/ya 2>/dev/null; then
-        log_success "Yazi installed via binary release"
-        YAZI_SUCCESS=true
-        rm -rf /tmp/yazi.tar.gz /tmp/yazi-x86_64-unknown-linux-gnu 2>/dev/null
+       tar -xzf /tmp/yazi.tar.gz -C /tmp 2>/dev/null; then
+        
+        # Find the extracted directory (it might have different naming)
+        YAZI_DIR=$(find /tmp -name "yazi-${YAZI_ARCH}" -o -name "yazi-*" -type d 2>/dev/null | head -1)
+        if [ -n "$YAZI_DIR" ] && [ -f "$YAZI_DIR/yazi" ]; then
+            if sudo mv "$YAZI_DIR/yazi" /usr/local/bin/ 2>/dev/null &&
+               [ -f "$YAZI_DIR/ya" ] && sudo mv "$YAZI_DIR/ya" /usr/local/bin/ 2>/dev/null &&
+               sudo chmod +x /usr/local/bin/yazi /usr/local/bin/ya 2>/dev/null; then
+                log_success "Yazi installed via binary release"
+                YAZI_SUCCESS=true
+            fi
+        fi
+        rm -rf /tmp/yazi.tar.gz /tmp/yazi-* 2>/dev/null
+    else
+        log_warning "Binary download failed for ${YAZI_ARCH}"
     fi
 fi
 
@@ -595,7 +619,7 @@ if [ "$YAZI_SUCCESS" = false ]; then
     # Try cargo installation if cargo is now available
     if command -v cargo >/dev/null 2>&1; then
         log_info "Installing Yazi via cargo..."
-        if timeout 300 cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
+        if timeout 180 cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
             log_success "Yazi installed via cargo"
             YAZI_SUCCESS=true
         else
