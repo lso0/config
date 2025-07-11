@@ -449,20 +449,29 @@ if [ "$ARCH" = "amd64" ]; then
         mkdir -p ~/.npm-global 2>/dev/null
         
         # Configure npm to use the new directory
-        npm config set prefix '~/.npm-global'
+        npm config set prefix "$HOME/.npm-global"
         
         # Add to PATH both for current session and future sessions
         if ! echo "$PATH" | grep -q "$HOME/.npm-global/bin"; then
             export PATH="$HOME/.npm-global/bin:$PATH"
-            echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+            # Ensure we don't add duplicate entries to bashrc
+            if ! grep -q "\.npm-global/bin" ~/.bashrc; then
+                echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+            fi
+            # Source bashrc to ensure PATH is updated
+            source ~/.bashrc 2>/dev/null || true
         fi
         
         log_info "Installing Infisical CLI via npm..."
         if npm install -g @infisical/cli 2>/dev/null; then
             log_success "Infisical CLI installed via npm"
             
-            # Verify installation
-            if command -v infisical >/dev/null 2>&1; then
+            # Ensure PATH is updated again after installation
+            export PATH="$HOME/.npm-global/bin:$PATH"
+            source ~/.bashrc 2>/dev/null || true
+            
+            # Verify installation with multiple checks
+            if command -v infisical >/dev/null 2>&1 || [ -x "$HOME/.npm-global/bin/infisical" ]; then
                 log_success "Infisical CLI verified and working"
                 INFISICAL_SUCCESS=true
             else
@@ -608,23 +617,30 @@ if [ "$YAZI_SUCCESS" = false ]; then
     if ! command -v cargo >/dev/null 2>&1; then
         log_info "Installing Rust/Cargo for Yazi..."
         if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null; then
-            # Source Rust environment for current session
-            source ~/.cargo/env 2>/dev/null || export PATH="$HOME/.cargo/bin:$PATH"
             log_success "Rust/Cargo installed"
         else
             log_warning "Failed to install Rust/Cargo"
         fi
     fi
     
+    # Source Rust environment for current session (do this regardless)
+    if [ -f ~/.cargo/env ]; then
+        source ~/.cargo/env 2>/dev/null || true
+    fi
+    export PATH="$HOME/.cargo/bin:$PATH"
+    
     # Try cargo installation if cargo is now available
     if command -v cargo >/dev/null 2>&1; then
         log_info "Installing Yazi via cargo..."
-        if timeout 180 cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
+        # Increase timeout to 5 minutes for large Rust compilation
+        if timeout 300 cargo install --locked yazi-fm yazi-cli 2>/dev/null; then
             log_success "Yazi installed via cargo"
             YAZI_SUCCESS=true
         else
             log_warning "Cargo installation failed or timed out"
         fi
+    else
+        log_warning "Cargo not available after Rust installation"
     fi
 fi
 
@@ -807,3 +823,19 @@ if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAI
 fi
 
 log_warning "Please reboot or logout/login to ensure all group changes take effect."
+
+# Automatic reboot option
+echo ""
+log_info "Setup completed! The system will reboot in 10 seconds to ensure all changes take effect."
+log_info "Press Ctrl+C to cancel the reboot if you want to stay logged in."
+echo ""
+
+# Countdown
+for i in 10 9 8 7 6 5 4 3 2 1; do
+    echo -n "Rebooting in $i seconds... "
+    sleep 1
+    echo ""
+done
+
+log_info "Rebooting now..."
+sudo reboot
