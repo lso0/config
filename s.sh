@@ -303,17 +303,17 @@ main() {
         
         # Check for success indicators in the logs
         if grep -q "Setup Complete\|🎉.*Complete" "$LOG_FILE" || [ $script_exit_code -eq 0 ]; then
-            log_success "🎉 Setup completed successfully!"
-            log_to_file "Platform script execution: SUCCESS"
+        log_success "🎉 Setup completed successfully!"
+        log_to_file "Platform script execution: SUCCESS"
         else
             # Check if it's a partial success (most core components installed)
             if grep -q "SUCCESS.*packages installed\|SUCCESS.*tools installed\|SUCCESS.*Development tools installed" "$LOG_FILE"; then
                 log_success "🎉 Setup completed with partial success!"
                 log_warning "Some optional packages may have been skipped, but core installation succeeded"
                 log_to_file "Platform script execution: PARTIAL SUCCESS"
-            else
-                log_error "❌ Setup failed. Please check the logs above."
-                log_to_file "Platform script execution: FAILED"
+    else
+        log_error "❌ Setup failed. Please check the logs above."
+        log_to_file "Platform script execution: FAILED"
                 exit 1
             fi
         fi
