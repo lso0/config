@@ -634,29 +634,73 @@ if [ "$YAZI_SUCCESS" = false ]; then
         log_info "Installing Yazi via cargo..."
         
         # Detect if we're in a resource-constrained environment (VM/container)
-        local timeout_duration=900  # Default 15 minutes
-        local cpu_cores=$(nproc 2>/dev/null || echo "1")
-        local total_mem=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}' || echo "1024")
+        timeout_duration=900  # Default 15 minutes
+        cpu_cores=$(nproc 2>/dev/null || echo "1")
+        total_mem=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}' || echo "1024")
         
         # Increase timeout for resource-constrained environments
         if [ "$cpu_cores" -le 2 ] || [ "$total_mem" -le 2048 ]; then
             timeout_duration=3600  # 1 hour for VMs/low-resource systems
             log_info "Detected resource-constrained environment (${cpu_cores} cores, ${total_mem}MB RAM)"
-            log_info "Using extended timeout (60 minutes) for Rust compilation in VM"
+            log_info "Using extended timeout (60 minutes) for Rust compilation"
         else
             log_info "Detected powerful system (${cpu_cores} cores, ${total_mem}MB RAM)"
             log_info "Using standard timeout (15 minutes) for Rust compilation"
         fi
         
-        log_info "Building Yazi (this may take a while in VMs - up to $((timeout_duration/60)) minutes)..."
-        log_info "Progress: Downloading dependencies and compiling Rust crates..."
+        log_info "Building Yazi (this may take a while - up to $((timeout_duration/60)) minutes)..."
+        echo "Progress: Starting Rust compilation..."
         
-        if timeout "$timeout_duration" cargo install --locked yazi-fm yazi-cli; then
+        # Create a background process to show progress dots
+        show_progress() {
+            local count=0
+            while kill -0 $1 2>/dev/null; do
+                case $((count % 4)) in
+                    0) echo -ne "\rProgress: Compiling Rust crates.   " ;;
+                    1) echo -ne "\rProgress: Compiling Rust crates..  " ;;
+                    2) echo -ne "\rProgress: Compiling Rust crates... " ;;
+                    3) echo -ne "\rProgress: Compiling Rust crates...." ;;
+                esac
+                sleep 2
+                count=$((count + 1))
+                
+                # Show elapsed time every minute
+                if [ $((count % 30)) -eq 0 ]; then
+                    elapsed=$((count * 2 / 60))
+                    echo -ne "\rProgress: ${elapsed} minutes elapsed, still compiling..."
+                    sleep 2
+                fi
+            done
+            echo -e "\rProgress: Compilation finished.                    "
+        }
+        
+        # Run cargo in background and capture both stdout and stderr to log
+        (
+            timeout "$timeout_duration" cargo install --locked yazi-fm yazi-cli 2>&1
+            echo "CARGO_EXIT_CODE=$?" > /tmp/cargo_exit_code
+        ) >> "$LOG_FILE" 2>&1 &
+        cargo_pid=$!
+        
+        # Show progress while cargo runs
+        show_progress $cargo_pid
+        
+        # Wait for cargo to finish
+        wait $cargo_pid
+        
+        # Get the exit code
+        if [ -f /tmp/cargo_exit_code ]; then
+            source /tmp/cargo_exit_code
+            rm -f /tmp/cargo_exit_code
+        else
+            CARGO_EXIT_CODE=1
+        fi
+        
+        if [ "$CARGO_EXIT_CODE" -eq 0 ]; then
             log_success "Yazi installed via cargo"
             YAZI_SUCCESS=true
         else
             log_warning "Cargo installation failed or timed out after $((timeout_duration/60)) minutes"
-            log_info "In VMs, Rust compilation can take 30-60 minutes due to limited resources"
+            log_info "Check log file for detailed compilation output: $LOG_FILE"
         fi
     else
         log_warning "Cargo not available after Rust installation"
