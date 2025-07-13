@@ -146,6 +146,16 @@ cleanup() {
     fi
     ((additional_attempted++))
     
+    if [ "$DESKTOP_SUCCESS" = true ]; then
+        ((additional_success_count++))
+    fi
+    ((additional_attempted++))
+    
+    if [ "$CHROME_SUCCESS" = true ]; then
+        ((additional_success_count++))
+    fi
+    ((additional_attempted++))
+    
     # Calculate success percentage for core components
     local success_percentage=$((core_success_count * 100 / total_attempted))
     
@@ -1040,6 +1050,10 @@ else
     log_warning "Browser automation tools installation was skipped or failed"
 fi
 
+# Initialize desktop and chrome success flags
+DESKTOP_SUCCESS=false
+CHROME_SUCCESS=false
+
 # Install Yazi file manager and its dependencies
 log_info "Installing Yazi file manager and dependencies..."
 YAZI_SUCCESS=false
@@ -1296,6 +1310,245 @@ else
     log_info "2. Via snap: sudo snap install speedtest-cli"
 fi
 
+# Install Desktop Environment (Ubuntu Desktop)
+log_info "Installing Ubuntu Desktop Environment..."
+DESKTOP_SUCCESS=false
+
+# Install Ubuntu Desktop
+if retry_command sudo apt install -y ubuntu-desktop-minimal; then
+    log_success "Ubuntu Desktop Environment installed"
+    DESKTOP_SUCCESS=true
+else
+    log_warning "Ubuntu Desktop installation failed, trying alternative..."
+    # Try installing just the essential desktop components
+    if retry_command sudo apt install -y xorg xfce4 xfce4-goodies lightdm; then
+        log_success "XFCE Desktop Environment installed as alternative"
+        DESKTOP_SUCCESS=true
+    else
+        log_warning "Desktop environment installation failed"
+    fi
+fi
+
+# Install Google Chrome
+log_info "Installing Google Chrome..."
+CHROME_SUCCESS=false
+
+# Add Google Chrome repository
+log_info "Adding Google Chrome repository..."
+if wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add - 2>/dev/null; then
+    if echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list >/dev/null; then
+        retry_command sudo apt update
+        if retry_command sudo apt install -y google-chrome-stable; then
+            log_success "Google Chrome installed successfully"
+            CHROME_SUCCESS=true
+        else
+            log_warning "Google Chrome installation failed"
+        fi
+    else
+        log_warning "Failed to add Google Chrome repository"
+    fi
+else
+    log_warning "Failed to add Google Chrome GPG key"
+fi
+
+# Install Chrome Profile Sync System
+if [ "$CHROME_SUCCESS" = true ]; then
+    log_info "Setting up Chrome Profile Sync System..."
+    
+    # Create profile_sync directory in user's home
+    PROFILE_SYNC_DIR="$HOME/profile_sync"
+    mkdir -p "$PROFILE_SYNC_DIR"
+    
+    # Copy profile sync scripts from the config repository
+    if [ -d "profile_sync" ]; then
+        log_info "Copying profile sync scripts from local repository..."
+        cp -r profile_sync/* "$PROFILE_SYNC_DIR/"
+        chmod +x "$PROFILE_SYNC_DIR/scripts/"*.sh 2>/dev/null || true
+        chmod +x "$PROFILE_SYNC_DIR/demo.sh" 2>/dev/null || true
+        log_success "Profile sync scripts copied to $PROFILE_SYNC_DIR"
+    else
+        log_info "Creating profile sync scripts..."
+        
+        # Create basic profile sync structure
+        mkdir -p "$PROFILE_SYNC_DIR/scripts" "$PROFILE_SYNC_DIR/config" "$PROFILE_SYNC_DIR/backups"
+        
+        # Create a simple download script for immediate use
+        cat > "$PROFILE_SYNC_DIR/scripts/download.sh" << 'EOF'
+#!/bin/bash
+echo "⬇️  Chrome Profile Sync - Download from Raspberry Pi"
+echo "=================================================="
+
+PI_USER="wgr0"
+PI_HOST="192.168.1.9"
+PI_PROFILE_PATH="/home/wgr0/google-chrome"
+LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
+
+# Test connection
+echo "Testing connection to Raspberry Pi..."
+if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
+    echo "✅ Successfully connected to $PI_USER@$PI_HOST"
+else
+    echo "❌ Failed to connect to $PI_USER@$PI_HOST"
+    echo "Please ensure:"
+    echo "1. Raspberry Pi is accessible at 192.168.1.9"
+    echo "2. SSH key is configured: ssh-copy-id $PI_USER@$PI_HOST"
+    exit 1
+fi
+
+# Check if Chrome is running
+if pgrep -f "google-chrome" > /dev/null; then
+    echo "⚠️  Google Chrome is running. Please close Chrome before syncing."
+    read -p "Press Enter after closing Chrome to continue..."
+fi
+
+# Create backup of current profile
+if [ -d "$LOCAL_PROFILE_PATH" ]; then
+    echo "Creating backup of current profile..."
+    BACKUP_NAME="pre-download-$(date +%Y%m%d-%H%M%S)"
+    cp -r "$LOCAL_PROFILE_PATH" "$HOME/profile_sync/backups/$BACKUP_NAME"
+    echo "✅ Backup created: $BACKUP_NAME"
+fi
+
+# Download profile from Pi
+echo "Downloading Chrome profile from Raspberry Pi..."
+echo "This may take a few minutes..."
+
+if rsync -avhz --delete --progress \
+    --exclude='*/Cache/*' \
+    --exclude='*/Code Cache/*' \
+    --exclude='*/Media Cache/*' \
+    --exclude='*/GPUCache/*' \
+    --exclude='*/logs/*' \
+    --exclude='*.tmp' \
+    --exclude='*.log' \
+    "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/" \
+    "$LOCAL_PROFILE_PATH/"; then
+    
+    echo "✅ Profile downloaded successfully!"
+    echo "Profile size: $(du -sh "$LOCAL_PROFILE_PATH" | cut -f1)"
+    echo ""
+    echo "🚀 Next Steps:"
+    echo "1. Start Google Chrome to verify profile"
+    echo "2. To upload changes back: ./upload.sh"
+    
+else
+    echo "❌ Failed to download profile from Raspberry Pi"
+    exit 1
+fi
+EOF
+
+        # Create a simple upload script
+        cat > "$PROFILE_SYNC_DIR/scripts/upload.sh" << 'EOF'
+#!/bin/bash
+echo "⬆️  Chrome Profile Sync - Upload to Raspberry Pi"
+echo "=============================================="
+
+PI_USER="wgr0"
+PI_HOST="192.168.1.9"
+PI_PROFILE_PATH="/home/wgr0/google-chrome"
+LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
+
+# Test connection
+echo "Testing connection to Raspberry Pi..."
+if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
+    echo "✅ Successfully connected to $PI_USER@$PI_HOST"
+else
+    echo "❌ Failed to connect to $PI_USER@$PI_HOST"
+    exit 1
+fi
+
+# Check if local profile exists
+if [ ! -d "$LOCAL_PROFILE_PATH" ]; then
+    echo "❌ Local Chrome profile not found at $LOCAL_PROFILE_PATH"
+    echo "Make sure Google Chrome is installed and has been run at least once."
+    exit 1
+fi
+
+# Check if Chrome is running
+if pgrep -f "google-chrome" > /dev/null; then
+    echo "⚠️  Google Chrome is running. Please close Chrome before syncing."
+    read -p "Press Enter after closing Chrome to continue..."
+fi
+
+# Upload profile to Pi
+echo "Uploading Chrome profile to Raspberry Pi..."
+echo "This may take a few minutes..."
+
+if rsync -avhz --delete --progress \
+    --exclude='*/Cache/*' \
+    --exclude='*/Code Cache/*' \
+    --exclude='*/Media Cache/*' \
+    --exclude='*/GPUCache/*' \
+    --exclude='*/logs/*' \
+    --exclude='*.tmp' \
+    --exclude='*.log' \
+    "$LOCAL_PROFILE_PATH/" \
+    "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/"; then
+    
+    echo "✅ Profile uploaded successfully!"
+    echo ""
+    echo "🚀 Profile is now available on Raspberry Pi"
+    echo "Download on other machines: ./download.sh"
+    
+else
+    echo "❌ Failed to upload profile to Raspberry Pi"
+    exit 1
+fi
+EOF
+
+        chmod +x "$PROFILE_SYNC_DIR/scripts/"*.sh
+        log_success "Basic profile sync scripts created in $PROFILE_SYNC_DIR"
+    fi
+    
+    # Create a post-installation script for Chrome profile sync setup
+    cat > "$HOME/setup-chrome-sync.sh" << 'EOF'
+#!/bin/bash
+echo "🔧 Chrome Profile Sync Setup"
+echo "============================"
+echo ""
+echo "This script will help you set up Chrome profile syncing with your Raspberry Pi."
+echo ""
+echo "Prerequisites:"
+echo "• Raspberry Pi accessible at 192.168.1.9"
+echo "• SSH access to user 'wgr0' on the Pi"
+echo ""
+
+# Setup SSH key if not exists
+if [ ! -f "$HOME/.ssh/id_rsa" ]; then
+    echo "Generating SSH key..."
+    ssh-keygen -t rsa -b 4096 -C "chrome-sync-$(hostname)" -f "$HOME/.ssh/id_rsa" -N ""
+fi
+
+# Copy SSH key to Pi
+echo "Setting up SSH key authentication with Raspberry Pi..."
+echo "You may need to enter your password for the Raspberry Pi:"
+ssh-copy-id -i "$HOME/.ssh/id_rsa.pub" wgr0@192.168.1.9
+
+# Test connection
+echo "Testing connection..."
+if ssh -o ConnectTimeout=10 wgr0@192.168.1.9 "echo 'Connection successful'" >/dev/null 2>&1; then
+    echo "✅ SSH connection successful!"
+    echo ""
+    echo "🚀 Chrome Profile Sync is ready!"
+    echo ""
+    echo "Usage:"
+    echo "• Download profile from Pi: cd ~/profile_sync && ./scripts/download.sh"
+    echo "• Upload profile to Pi: cd ~/profile_sync && ./scripts/upload.sh"
+    echo ""
+    echo "First time setup:"
+    echo "1. Run Chrome once to create profile"
+    echo "2. Upload your profile: ./scripts/upload.sh"
+    echo "3. Download on other machines: ./scripts/download.sh"
+else
+    echo "❌ SSH connection failed"
+    echo "Please check your Pi IP address and SSH configuration"
+fi
+EOF
+
+    chmod +x "$HOME/setup-chrome-sync.sh"
+    log_success "Chrome profile sync setup script created: ~/setup-chrome-sync.sh"
+fi
+
 # Cleanup
 log_info "Cleaning up..."
 sudo apt autoremove -y
@@ -1349,6 +1602,22 @@ echo "    ./init_profiles.sh  # Initialize Chrome profiles"
 echo "    node puppeteer_example.js  # Run Puppeteer automation"
 echo "    python3 undetected_selenium_example.py  # Anti-detection automation"
 echo ""
+echo "13. Desktop Environment:"
+if [ "$DESKTOP_SUCCESS" = true ]; then
+    echo "    ✅ Desktop environment installed - reboot to access GUI"
+else
+    echo "    ⚠️  Desktop installation failed - install manually: sudo apt install ubuntu-desktop"
+fi
+echo ""
+echo "14. Google Chrome Profile Sync:"
+if [ "$CHROME_SUCCESS" = true ]; then
+    echo "    ✅ Chrome installed - setup profile sync: ~/setup-chrome-sync.sh"
+    echo "    • Upload profile to Pi: cd ~/profile_sync && ./scripts/upload.sh"
+    echo "    • Download profile from Pi: cd ~/profile_sync && ./scripts/download.sh"
+else
+    echo "    ⚠️  Chrome installation failed - install manually"
+fi
+echo ""
 log_info "Installation Summary:"
 echo "• Git: $(git --version 2>/dev/null || echo 'Not installed')"
 if [ "$GITHUB_CLI_SUCCESS" = true ]; then
@@ -1391,6 +1660,17 @@ if [ "$BROWSER_AUTOMATION_SUCCESS" = true ]; then
 else
     echo "• Browser Automation: SKIPPED (installation failed)"
 fi
+if [ "$DESKTOP_SUCCESS" = true ]; then
+    echo "• Desktop Environment: Ubuntu Desktop (reboot to access GUI)"
+else
+    echo "• Desktop Environment: SKIPPED (installation failed)"
+fi
+if [ "$CHROME_SUCCESS" = true ]; then
+    echo "• Google Chrome: $(google-chrome --version 2>/dev/null | head -n1 || echo 'Installed')"
+    echo "• Chrome Profile Sync: Setup script created (~/setup-chrome-sync.sh)"
+else
+    echo "• Google Chrome: SKIPPED (installation failed)"
+fi
 if [ "$INFISICAL_SUCCESS" = true ]; then
     echo "• Infisical CLI: Installed"
 else
@@ -1417,7 +1697,7 @@ echo "• tmux: $(tmux -V 2>/dev/null || echo 'Installed')"
 echo ""
 
 # Show what needs manual attention
-if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$GCLOUD_SUCCESS" = false ] || [ "$QEMU_SUCCESS" = false ] || [ "$ZSH_SUCCESS" = false ] || [ "$BROWSER_AUTOMATION_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
+if [ "$GITHUB_CLI_SUCCESS" = false ] || [ "$DOCKER_SUCCESS" = false ] || [ "$TAILSCALE_SUCCESS" = false ] || [ "$MULLVAD_SUCCESS" = false ] || [ "$GCLOUD_SUCCESS" = false ] || [ "$QEMU_SUCCESS" = false ] || [ "$ZSH_SUCCESS" = false ] || [ "$BROWSER_AUTOMATION_SUCCESS" = false ] || [ "$DESKTOP_SUCCESS" = false ] || [ "$CHROME_SUCCESS" = false ] || [ "$INFISICAL_SUCCESS" = false ] || [ "$NODE_SUCCESS" = false ] || [ "$YAZI_SUCCESS" = false ] || [ "$SPEEDTEST_SUCCESS" = false ]; then
     log_warning "Some packages were skipped due to compatibility or repository issues."
     log_info "These can be installed manually later using their official installation methods."
 fi

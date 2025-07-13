@@ -1,54 +1,54 @@
 wgus0@wgus0:~$ curl wgms.uk|bash
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 10235    0 10235    0     0  33840      0 --:--:-- --:--:-- --:--:-- 33890
+100 10203    0 10203    0     0  37525      0 --:--:-- --:--:-- --:--:-- 37649
 [INFO] 🚀 Universal System Setup - Detecting Environment...
-2025-07-11 14:50:22 - INFO: 🚀 Universal System Setup - Detecting Environment...
-2025-07-11 14:50:22 - === STARTING UNIVERSAL SETUP ===
-2025-07-11 14:50:22 - === SYSTEM INFORMATION ===
-2025-07-11 14:50:22 - OS: Linux
-2025-07-11 14:50:22 - Kernel: 6.8.0-63-generic
-2025-07-11 14:50:22 - Architecture: x86_64
-2025-07-11 14:50:22 - Hostname: wgus0
-2025-07-11 14:50:22 - Distribution: Ubuntu 24.04.2 LTS
-2025-07-11 14:50:22 - Uptime:  14:50:22 up 11 min,  2 users,  load average: 0.00, 0.01, 0.00
-2025-07-11 14:50:22 - Disk Space: /dev/mapper/ubuntu--vg-ubuntu--lv   98G   11G   83G  12% /
-2025-07-11 14:50:22 - Memory: Mem:            60Gi       1.0Gi        59Gi       1.6Mi       439Mi        59Gi
-2025-07-11 14:50:22 - === END SYSTEM INFO ===
+2025-07-13 10:02:03 - INFO: 🚀 Universal System Setup - Detecting Environment...
+2025-07-13 10:02:03 - === STARTING UNIVERSAL SETUP ===
+2025-07-13 10:02:03 - === SYSTEM INFORMATION ===
+2025-07-13 10:02:03 - OS: Linux
+2025-07-13 10:02:03 - Kernel: 6.8.0-63-generic
+2025-07-13 10:02:03 - Architecture: x86_64
+2025-07-13 10:02:03 - Hostname: wgus0
+2025-07-13 10:02:03 - Distribution: Ubuntu 24.04.2 LTS
+2025-07-13 10:02:03 - Uptime:  10:02:03 up 3 min,  2 users,  load average: 0.06, 0.07, 0.02
+2025-07-13 10:02:03 - Disk Space: /dev/mapper/ubuntu--vg-ubuntu--lv   98G   11G   83G  12% /
+2025-07-13 10:02:03 - Memory: Mem:            60Gi       1.0Gi        59Gi       1.6Mi       629Mi        59Gi
+2025-07-13 10:02:03 - === END SYSTEM INFO ===
 [INFO] Detecting system configuration...
-2025-07-11 14:50:22 - INFO: Detecting system configuration...
+2025-07-13 10:02:03 - INFO: Detecting system configuration...
 [INFO] System: linux (ubuntu) on amd64
-2025-07-11 14:50:26 - INFO: System: linux (ubuntu) on amd64
+2025-07-13 10:02:07 - INFO: System: linux (ubuntu) on amd64
 [INFO] Network: restricted
-2025-07-11 14:50:26 - INFO: Network: restricted
-2025-07-11 14:50:26 - === DETECTION RESULTS ===
-2025-07-11 14:50:26 - OS Type: linux
-2025-07-11 14:50:26 - Distribution: ubuntu
-2025-07-11 14:50:26 - Architecture: amd64
-2025-07-11 14:50:26 - Hardware:
-2025-07-11 14:50:26 - Network: restricted
-2025-07-11 14:50:26 - === END DETECTION ===
+2025-07-13 10:02:07 - INFO: Network: restricted
+2025-07-13 10:02:07 - === DETECTION RESULTS ===
+2025-07-13 10:02:07 - OS Type: linux
+2025-07-13 10:02:07 - Distribution: ubuntu
+2025-07-13 10:02:07 - Architecture: amd64
+2025-07-13 10:02:07 - Hardware:
+2025-07-13 10:02:07 - Network: restricted
+2025-07-13 10:02:07 - === END DETECTION ===
 [SUCCESS] ✅ Selected script: https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh
-2025-07-11 14:50:26 - SUCCESS: ✅ Selected script: https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh
-2025-07-11 14:50:26 - Selected script URL: https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh
+2025-07-13 10:02:07 - SUCCESS: ✅ Selected script: https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh
+2025-07-13 10:02:07 - Selected script URL: https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh
 [INFO] 🔄 Downloading and executing setup script...
-2025-07-11 14:50:26 - INFO: 🔄 Downloading and executing setup script...
-2025-07-11 14:50:26 - === EXECUTING PLATFORM SCRIPT ===
-2025-07-11 14:50:26 - COMMAND: curl -fsSL 'https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh' | bash
+2025-07-13 10:02:07 - INFO: 🔄 Downloading and executing setup script...
+2025-07-13 10:02:07 - === EXECUTING PLATFORM SCRIPT ===
+2025-07-13 10:02:07 - COMMAND: curl -fsSL 'https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh' | bash
 [INFO] Please enter your password for sudo access:
-2025-07-11 14:50:27 - INFO: Please enter your password for sudo access:
+2025-07-13 10:02:08 - INFO: Please enter your password for sudo access:
 [sudo] password for wgus0:
 [INFO] Starting Ubuntu Server One-Click Setup...
-2025-07-11 14:50:31 - INFO: Starting Ubuntu Server One-Click Setup...
-2025-07-11 14:50:31 - === UBUNTU SETUP STARTING ===
-2025-07-11 14:50:31 - === SYSTEM INFORMATION ===
-2025-07-11 14:50:31 - OS: Linux wgus0 6.8.0-63-generic #66-Ubuntu SMP PREEMPT_DYNAMIC Fri Jun 13 20:25:30 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
-2025-07-11 14:50:31 - Distribution: Distributor ID:     Ubuntu
+2025-07-13 10:02:17 - INFO: Starting Ubuntu Server One-Click Setup...
+2025-07-13 10:02:17 - === UBUNTU SETUP STARTING ===
+2025-07-13 10:02:17 - === SYSTEM INFORMATION ===
+2025-07-13 10:02:17 - OS: Linux wgus0 6.8.0-63-generic #66-Ubuntu SMP PREEMPT_DYNAMIC Fri Jun 13 20:25:30 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+2025-07-13 10:02:17 - Distribution: Distributor ID:     Ubuntu
 Description:    Ubuntu 24.04.2 LTS
 Release:        24.04
 Codename:       noble
-2025-07-11 14:50:31 - Uptime:  14:50:31 up 11 min,  2 users,  load average: 0.00, 0.01, 0.00
-2025-07-11 14:50:31 - Disk Space: Filesystem                         Size  Used Avail Use% Mounted on
+2025-07-13 10:02:17 - Uptime:  10:02:17 up 4 min,  2 users,  load average: 0.05, 0.07, 0.02
+2025-07-13 10:02:17 - Disk Space: Filesystem                         Size  Used Avail Use% Mounted on
 tmpfs                              6.1G  1.6M  6.1G   1% /run
 efivarfs                           128K   44K   80K  36% /sys/firmware/efi/efivars
 /dev/mapper/ubuntu--vg-ubuntu--lv   98G   11G   83G  12% /
@@ -57,30 +57,30 @@ tmpfs                              5.0M     0  5.0M   0% /run/lock
 /dev/nvme0n1p2                     2.0G  101M  1.7G   6% /boot
 /dev/nvme0n1p1                     1.1G  6.2M  1.1G   1% /boot/efi
 tmpfs                              6.1G   12K  6.1G   1% /run/user/1000
-2025-07-11 14:50:31 - Memory:                total        used        free      shared  buff/cache   available
-Mem:            60Gi       1.0Gi        59Gi       1.6Mi       440Mi        59Gi
+2025-07-13 10:02:17 - Memory:                total        used        free      shared  buff/cache   available
+Mem:            60Gi       1.0Gi        59Gi       1.6Mi       629Mi        59Gi
 Swap:          8.0Gi          0B       8.0Gi
-2025-07-11 14:50:31 - User: wgus0
-2025-07-11 14:50:31 - Groups: wgus0 adm cdrom sudo dip plugdev lxd
-2025-07-11 14:50:31 - === END SYSTEM INFO ===
+2025-07-13 10:02:17 - User: wgus0
+2025-07-13 10:02:17 - Groups: wgus0 adm cdrom sudo dip plugdev lxd
+2025-07-13 10:02:17 - === END SYSTEM INFO ===
 [INFO] Updating system packages...
-2025-07-11 14:50:31 - INFO: Updating system packages...
-2025-07-11 14:50:31 - COMMAND: sudo apt update
-2025-07-11 14:50:31 - Attempt 1 of 3: sudo apt update
+2025-07-13 10:02:17 - INFO: Updating system packages...
+2025-07-13 10:02:17 - COMMAND: sudo apt update
+2025-07-13 10:02:17 - Attempt 1 of 3: sudo apt update
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
-Hit:1 http://pl.archive.ubuntu.com/ubuntu noble InRelease
-Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://pl.archive.ubuntu.com/ubuntu noble InRelease
 Hit:3 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
 Hit:4 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
 Reading package lists...
 Building dependency tree...
 Reading state information...
 71 packages can be upgraded. Run 'apt list --upgradable' to see them.
-2025-07-11 14:50:32 - Command succeeded on attempt 1
-2025-07-11 14:50:32 - COMMAND: sudo apt full-upgrade -y
-2025-07-11 14:50:32 - Attempt 1 of 3: sudo apt full-upgrade -y
+2025-07-13 10:02:18 - Command succeeded on attempt 1
+2025-07-13 10:02:18 - COMMAND: sudo apt full-upgrade -y
+2025-07-13 10:02:18 - Attempt 1 of 3: sudo apt full-upgrade -y
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -180,7 +180,7 @@ Get:68 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 snapd amd64 
 Get:69 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 sosreport amd64 4.8.2-0ubuntu0~24.04.2 [364 kB]
 Get:70 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 cloud-init all 25.1.2-0ubuntu0~24.04.1 [607 kB]
 Preconfiguring packages ...
-Fetched 48.2 MB in 1s (43.4 MB/s)
+Fetched 48.2 MB in 1s (45.4 MB/s)
 (Reading database ... 86812 files and directories currently installed.)
 Preparing to unpack .../bsdutils_1%3a2.39.3-9ubuntu6.3_amd64.deb ...
 Unpacking bsdutils (1:2.39.3-9ubuntu6.3) over (1:2.39.3-9ubuntu6.2) ...
@@ -453,17 +453,17 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ session #4: apt[2741]
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ session #4: apt[3121]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:51:09 - Command succeeded on attempt 1
+2025-07-13 10:02:58 - Command succeeded on attempt 1
 [SUCCESS] System updated successfully
-2025-07-11 14:51:09 - SUCCESS: System updated successfully
+2025-07-13 10:02:58 - SUCCESS: System updated successfully
 [INFO] Installing essential packages...
-2025-07-11 14:51:09 - INFO: Installing essential packages...
-2025-07-11 14:51:09 - COMMAND: sudo apt install -y git curl wget unzip htop tree vim nano build-essential software-properties-common apt-transport-https ca-certificates gnupg lsb-release ufw fail2ban openssh-server
-2025-07-11 14:51:09 - Attempt 1 of 3: sudo apt install -y git curl wget unzip htop tree vim nano build-essential software-properties-common apt-transport-https ca-certificates gnupg lsb-release ufw fail2ban openssh-server
+2025-07-13 10:02:58 - INFO: Installing essential packages...
+2025-07-13 10:02:58 - COMMAND: sudo apt install -y git curl wget unzip htop tree vim nano build-essential software-properties-common apt-transport-https ca-certificates gnupg lsb-release ufw fail2ban openssh-server
+2025-07-13 10:02:58 - Attempt 1 of 3: sudo apt install -y git curl wget unzip htop tree vim nano build-essential software-properties-common apt-transport-https ca-certificates gnupg lsb-release ufw fail2ban openssh-server
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -579,7 +579,7 @@ Get:51 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 python3-pyinotify al
 Get:52 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 tree amd64 2.1.1-2ubuntu3 [47.1 kB]
 Get:53 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 unzip amd64 6.0-28ubuntu4.1 [174 kB]
 Get:54 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 whois amd64 5.5.22 [51.7 kB]
-Fetched 67.6 MB in 1s (60.7 MB/s)
+Fetched 67.6 MB in 3s (23.6 MB/s)
 Selecting previously unselected package apt-transport-https.
 (Reading database ... 86923 files and directories currently installed.)
 Preparing to unpack .../00-apt-transport-https_2.8.3_all.deb ...
@@ -837,31 +837,31 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:51:23 - Command succeeded on attempt 1
+2025-07-13 10:03:13 - Command succeeded on attempt 1
 [SUCCESS] Essential packages installed
-2025-07-11 14:51:23 - SUCCESS: Essential packages installed
+2025-07-13 10:03:13 - SUCCESS: Essential packages installed
 [INFO] Configuring basic security...
-2025-07-11 14:51:23 - INFO: Configuring basic security...
+2025-07-13 10:03:13 - INFO: Configuring basic security...
 Firewall is active and enabled on system startup
 Synchronizing state of fail2ban.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
 Executing: /usr/lib/systemd/systemd-sysv-install enable fail2ban
 [SUCCESS] Basic security configured
-2025-07-11 14:51:23 - SUCCESS: Basic security configured
+2025-07-13 10:03:13 - SUCCESS: Basic security configured
 [INFO] Installing GitHub CLI...
-2025-07-11 14:51:23 - INFO: Installing GitHub CLI...
+2025-07-13 10:03:13 - INFO: Installing GitHub CLI...
 [INFO] Downloading GitHub CLI GPG key...
-2025-07-11 14:51:23 - INFO: Downloading GitHub CLI GPG key...
+2025-07-13 10:03:13 - INFO: Downloading GitHub CLI GPG key...
 [SUCCESS] GitHub CLI GPG key imported successfully
-2025-07-11 14:51:24 - SUCCESS: GitHub CLI GPG key imported successfully
+2025-07-13 10:03:14 - SUCCESS: GitHub CLI GPG key imported successfully
 [INFO] Adding GitHub CLI repository...
-2025-07-11 14:51:24 - INFO: Adding GitHub CLI repository...
+2025-07-13 10:03:14 - INFO: Adding GitHub CLI repository...
 [INFO] Updating package lists after adding GitHub CLI repository...
-2025-07-11 14:51:24 - INFO: Updating package lists after adding GitHub CLI repository...
-2025-07-11 14:51:24 - COMMAND: sudo apt update
-2025-07-11 14:51:24 - Attempt 1 of 3: sudo apt update
+2025-07-13 10:03:14 - INFO: Updating package lists after adding GitHub CLI repository...
+2025-07-13 10:03:14 - COMMAND: sudo apt update
+2025-07-13 10:03:14 - Attempt 1 of 3: sudo apt update
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -871,18 +871,18 @@ Hit:3 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
 Hit:4 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
 Get:5 https://cli.github.com/packages stable InRelease [3,917 B]
 Get:6 https://cli.github.com/packages stable/main amd64 Packages [345 B]
-Fetched 4,262 B in 2s (2,523 B/s)
+Fetched 4,262 B in 1s (7,457 B/s)
 Reading package lists...
 Building dependency tree...
 Reading state information...
 1 package can be upgraded. Run 'apt list --upgradable' to see it.
-2025-07-11 14:51:26 - Command succeeded on attempt 1
+2025-07-13 10:03:15 - Command succeeded on attempt 1
 [SUCCESS] Package lists updated successfully
-2025-07-11 14:51:26 - SUCCESS: Package lists updated successfully
+2025-07-13 10:03:15 - SUCCESS: Package lists updated successfully
 [INFO] Installing GitHub CLI package...
-2025-07-11 14:51:26 - INFO: Installing GitHub CLI package...
-2025-07-11 14:51:26 - COMMAND: sudo apt install -y gh
-2025-07-11 14:51:26 - Attempt 1 of 3: sudo apt install -y gh
+2025-07-13 10:03:15 - INFO: Installing GitHub CLI package...
+2025-07-13 10:03:15 - COMMAND: sudo apt install -y gh
+2025-07-13 10:03:15 - Attempt 1 of 3: sudo apt install -y gh
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -917,16 +917,16 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:51:30 - Command succeeded on attempt 1
+2025-07-13 10:03:19 - Command succeeded on attempt 1
 [SUCCESS] GitHub CLI installed successfully
-2025-07-11 14:51:30 - SUCCESS: GitHub CLI installed successfully
+2025-07-13 10:03:19 - SUCCESS: GitHub CLI installed successfully
 [INFO] Installing Docker...
-2025-07-11 14:51:30 - INFO: Installing Docker...
-2025-07-11 14:51:30 - COMMAND: sudo apt install -y ca-certificates gnupg
-2025-07-11 14:51:30 - Attempt 1 of 3: sudo apt install -y ca-certificates gnupg
+2025-07-13 10:03:19 - INFO: Installing Docker...
+2025-07-13 10:03:19 - COMMAND: sudo apt install -y ca-certificates gnupg
+2025-07-13 10:03:19 - Attempt 1 of 3: sudo apt install -y ca-certificates gnupg
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -936,39 +936,39 @@ Reading state information...
 ca-certificates is already the newest version (20240203).
 gnupg is already the newest version (2.4.4-2ubuntu17.3).
 0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
-2025-07-11 14:51:30 - Command succeeded on attempt 1
+2025-07-13 10:03:19 - Command succeeded on attempt 1
 [INFO] Downloading Docker GPG key...
-2025-07-11 14:51:30 - INFO: Downloading Docker GPG key...
+2025-07-13 10:03:19 - INFO: Downloading Docker GPG key...
 [SUCCESS] Docker GPG key imported successfully
-2025-07-11 14:51:30 - SUCCESS: Docker GPG key imported successfully
+2025-07-13 10:03:19 - SUCCESS: Docker GPG key imported successfully
 [INFO] Adding Docker repository...
-2025-07-11 14:51:30 - INFO: Adding Docker repository...
+2025-07-13 10:03:19 - INFO: Adding Docker repository...
 [INFO] Updating package lists after adding Docker repository...
-2025-07-11 14:51:30 - INFO: Updating package lists after adding Docker repository...
-2025-07-11 14:51:30 - COMMAND: sudo apt update
-2025-07-11 14:51:30 - Attempt 1 of 3: sudo apt update
+2025-07-13 10:03:19 - INFO: Updating package lists after adding Docker repository...
+2025-07-13 10:03:19 - COMMAND: sudo apt update
+2025-07-13 10:03:19 - Attempt 1 of 3: sudo apt update
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
-Get:1 https://download.docker.com/linux/ubuntu noble InRelease [48.8 kB]
-Hit:2 http://pl.archive.ubuntu.com/ubuntu noble InRelease
-Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
-Get:4 https://download.docker.com/linux/ubuntu noble/stable amd64 Packages [28.5 kB]
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Get:2 https://download.docker.com/linux/ubuntu noble InRelease [48.8 kB]
+Get:3 https://download.docker.com/linux/ubuntu noble/stable amd64 Packages [28.5 kB]
+Hit:4 http://pl.archive.ubuntu.com/ubuntu noble InRelease
 Hit:5 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
 Hit:6 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
 Hit:7 https://cli.github.com/packages stable InRelease
-Fetched 77.3 kB in 0s (169 kB/s)
+Fetched 77.3 kB in 0s (168 kB/s)
 Reading package lists...
 Building dependency tree...
 Reading state information...
 1 package can be upgraded. Run 'apt list --upgradable' to see it.
-2025-07-11 14:51:31 - Command succeeded on attempt 1
+2025-07-13 10:03:20 - Command succeeded on attempt 1
 [SUCCESS] Package lists updated successfully
-2025-07-11 14:51:31 - SUCCESS: Package lists updated successfully
+2025-07-13 10:03:20 - SUCCESS: Package lists updated successfully
 [INFO] Installing Docker packages...
-2025-07-11 14:51:31 - INFO: Installing Docker packages...
-2025-07-11 14:51:31 - COMMAND: sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-2025-07-11 14:51:31 - Attempt 1 of 3: sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+2025-07-13 10:03:20 - INFO: Installing Docker packages...
+2025-07-13 10:03:20 - COMMAND: sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+2025-07-13 10:03:20 - Attempt 1 of 3: sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -987,14 +987,14 @@ Need to get 103 MB of archives.
 After this operation, 429 MB of additional disk space will be used.
 Get:1 https://download.docker.com/linux/ubuntu noble/stable amd64 containerd.io amd64 1.7.27-1 [30.5 MB]
 Get:2 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 pigz amd64 2.8-1 [65.6 kB]
-Get:3 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-cli amd64 5:28.3.2-1~ubuntu.24.04~noble [16.5 MB]
-Get:4 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libslirp0 amd64 4.7.0-1ubuntu3 [63.8 kB]
-Get:5 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce amd64 5:28.3.2-1~ubuntu.24.04~noble [19.6 MB]
-Get:6 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 slirp4netns amd64 1.2.1-1build2 [34.9 kB]
+Get:3 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libslirp0 amd64 4.7.0-1ubuntu3 [63.8 kB]
+Get:4 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 slirp4netns amd64 1.2.1-1build2 [34.9 kB]
+Get:5 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-cli amd64 5:28.3.2-1~ubuntu.24.04~noble [16.5 MB]
+Get:6 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce amd64 5:28.3.2-1~ubuntu.24.04~noble [19.6 MB]
 Get:7 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-buildx-plugin amd64 0.25.0-1~ubuntu.24.04~noble [15.6 MB]
 Get:8 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-ce-rootless-extras amd64 5:28.3.2-1~ubuntu.24.04~noble [6,479 kB]
 Get:9 https://download.docker.com/linux/ubuntu noble/stable amd64 docker-compose-plugin amd64 2.38.2-1~ubuntu.24.04~noble [14.2 MB]
-Fetched 103 MB in 1s (94.1 MB/s)
+Fetched 103 MB in 2s (56.2 MB/s)
 Selecting previously unselected package containerd.io.
 (Reading database ... 89841 files and directories currently installed.)
 Preparing to unpack .../0-containerd.io_1.7.27-1_amd64.deb ...
@@ -1052,51 +1052,51 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:51:39 - Command succeeded on attempt 1
+2025-07-13 10:03:28 - Command succeeded on attempt 1
 Synchronizing state of docker.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
 Executing: /usr/lib/systemd/systemd-sysv-install enable docker
 [SUCCESS] Docker installed and configured
-2025-07-11 14:51:39 - SUCCESS: Docker installed and configured
+2025-07-13 10:03:29 - SUCCESS: Docker installed and configured
 [INFO] Installing Tailscale...
-2025-07-11 14:51:39 - INFO: Installing Tailscale...
+2025-07-13 10:03:29 - INFO: Installing Tailscale...
 [INFO] Downloading Tailscale GPG key...
-2025-07-11 14:51:39 - INFO: Downloading Tailscale GPG key...
+2025-07-13 10:03:29 - INFO: Downloading Tailscale GPG key...
 [SUCCESS] Tailscale GPG key imported successfully
-2025-07-11 14:51:39 - SUCCESS: Tailscale GPG key imported successfully
+2025-07-13 10:03:29 - SUCCESS: Tailscale GPG key imported successfully
 [INFO] Adding Tailscale repository...
-2025-07-11 14:51:39 - INFO: Adding Tailscale repository...
+2025-07-13 10:03:29 - INFO: Adding Tailscale repository...
 deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu noble main
 [INFO] Updating package lists after adding Tailscale repository...
-2025-07-11 14:51:39 - INFO: Updating package lists after adding Tailscale repository...
-2025-07-11 14:51:39 - COMMAND: sudo apt update
-2025-07-11 14:51:39 - Attempt 1 of 3: sudo apt update
+2025-07-13 10:03:29 - INFO: Updating package lists after adding Tailscale repository...
+2025-07-13 10:03:29 - COMMAND: sudo apt update
+2025-07-13 10:03:29 - Attempt 1 of 3: sudo apt update
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
-Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
-Hit:2 http://pl.archive.ubuntu.com/ubuntu noble InRelease
-Hit:3 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:1 http://pl.archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 https://download.docker.com/linux/ubuntu noble InRelease
 Hit:4 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
 Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
 Hit:6 https://cli.github.com/packages stable InRelease
 Get:7 https://pkgs.tailscale.com/stable/ubuntu noble InRelease
 Get:8 https://pkgs.tailscale.com/stable/ubuntu noble/main amd64 Packages [12.9 kB]
 Get:9 https://pkgs.tailscale.com/stable/ubuntu noble/main all Packages [354 B]
-Fetched 19.8 kB in 1s (25.9 kB/s)
+Fetched 19.8 kB in 1s (27.0 kB/s)
 Reading package lists...
 Building dependency tree...
 Reading state information...
 1 package can be upgraded. Run 'apt list --upgradable' to see it.
-2025-07-11 14:51:42 - Command succeeded on attempt 1
+2025-07-13 10:03:31 - Command succeeded on attempt 1
 [SUCCESS] Package lists updated successfully
-2025-07-11 14:51:42 - SUCCESS: Package lists updated successfully
+2025-07-13 10:03:31 - SUCCESS: Package lists updated successfully
 [INFO] Installing Tailscale package...
-2025-07-11 14:51:42 - INFO: Installing Tailscale package...
-2025-07-11 14:51:42 - COMMAND: sudo apt install -y tailscale
-2025-07-11 14:51:42 - Attempt 1 of 3: sudo apt install -y tailscale
+2025-07-13 10:03:31 - INFO: Installing Tailscale package...
+2025-07-13 10:03:31 - COMMAND: sudo apt install -y tailscale
+2025-07-13 10:03:31 - Attempt 1 of 3: sudo apt install -y tailscale
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -1112,7 +1112,7 @@ Need to get 32.6 MB of archives.
 After this operation, 61.3 MB of additional disk space will be used.
 Get:2 https://pkgs.tailscale.com/stable/ubuntu noble/main all tailscale-archive-keyring all 1.35.181 [3,082 B]
 Get:1 https://pkgs.tailscale.com/stable/ubuntu noble/main amd64 tailscale amd64 1.84.0 [32.6 MB]
-Fetched 32.6 MB in 1s (25.6 MB/s)
+Fetched 32.6 MB in 1s (36.7 MB/s)
 Selecting previously unselected package tailscale.
 (Reading database ... 90100 files and directories currently installed.)
 Preparing to unpack .../tailscale_1.84.0_amd64.deb ...
@@ -1138,49 +1138,49 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:51:45 - Command succeeded on attempt 1
+2025-07-13 10:03:34 - Command succeeded on attempt 1
 [SUCCESS] Tailscale installed and started
-2025-07-11 14:51:45 - SUCCESS: Tailscale installed and started
+2025-07-13 10:03:34 - SUCCESS: Tailscale installed and started
 [INFO] Installing Mullvad VPN...
-2025-07-11 14:51:45 - INFO: Installing Mullvad VPN...
+2025-07-13 10:03:34 - INFO: Installing Mullvad VPN...
 [INFO] Downloading Mullvad VPN GPG key...
-2025-07-11 14:51:45 - INFO: Downloading Mullvad VPN GPG key...
+2025-07-13 10:03:34 - INFO: Downloading Mullvad VPN GPG key...
 [SUCCESS] Mullvad VPN GPG key imported successfully
-2025-07-11 14:51:45 - SUCCESS: Mullvad VPN GPG key imported successfully
+2025-07-13 10:03:34 - SUCCESS: Mullvad VPN GPG key imported successfully
 [INFO] Adding Mullvad VPN repository...
-2025-07-11 14:51:45 - INFO: Adding Mullvad VPN repository...
+2025-07-13 10:03:34 - INFO: Adding Mullvad VPN repository...
 deb [signed-by=/usr/share/keyrings/mullvad-keyring.gpg arch=amd64] https://repository.mullvad.net/deb/stable noble main
 [INFO] Updating package lists after adding Mullvad VPN repository...
-2025-07-11 14:51:45 - INFO: Updating package lists after adding Mullvad VPN repository...
-2025-07-11 14:51:45 - COMMAND: sudo apt update
-2025-07-11 14:51:45 - Attempt 1 of 3: sudo apt update
+2025-07-13 10:03:34 - INFO: Updating package lists after adding Mullvad VPN repository...
+2025-07-13 10:03:34 - COMMAND: sudo apt update
+2025-07-13 10:03:34 - Attempt 1 of 3: sudo apt update
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
 Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
 Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
-Hit:3 http://pl.archive.ubuntu.com/ubuntu noble InRelease
-Hit:4 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
-Get:5 https://repository.mullvad.net/deb/stable noble InRelease [3,527 B]
-Hit:6 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
-Hit:7 https://cli.github.com/packages stable InRelease
-Get:8 https://repository.mullvad.net/deb/stable noble/main amd64 Packages [1,353 B]
+Get:3 https://repository.mullvad.net/deb/stable noble InRelease [3,527 B]
+Hit:4 http://pl.archive.ubuntu.com/ubuntu noble InRelease
+Get:5 https://repository.mullvad.net/deb/stable noble/main amd64 Packages [1,353 B]
+Hit:6 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:7 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:8 https://cli.github.com/packages stable InRelease
 Get:9 https://pkgs.tailscale.com/stable/ubuntu noble InRelease
-Fetched 11.5 kB in 1s (22.3 kB/s)
+Fetched 11.5 kB in 1s (21.9 kB/s)
 Reading package lists...
 Building dependency tree...
 Reading state information...
 1 package can be upgraded. Run 'apt list --upgradable' to see it.
-2025-07-11 14:51:46 - Command succeeded on attempt 1
+2025-07-13 10:03:35 - Command succeeded on attempt 1
 [SUCCESS] Package lists updated successfully
-2025-07-11 14:51:46 - SUCCESS: Package lists updated successfully
+2025-07-13 10:03:35 - SUCCESS: Package lists updated successfully
 [INFO] Installing Mullvad VPN package...
-2025-07-11 14:51:46 - INFO: Installing Mullvad VPN package...
-2025-07-11 14:51:46 - COMMAND: sudo apt install -y mullvad-vpn
-2025-07-11 14:51:46 - Attempt 1 of 3: sudo apt install -y mullvad-vpn
+2025-07-13 10:03:35 - INFO: Installing Mullvad VPN package...
+2025-07-13 10:03:35 - COMMAND: sudo apt install -y mullvad-vpn
+2025-07-13 10:03:35 - Attempt 1 of 3: sudo apt install -y mullvad-vpn
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -1227,36 +1227,36 @@ Get:2 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 libgdk-pixbuf
 Get:3 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 gtk-update-icon-cache amd64 3.24.41-4ubuntu1.3 [51.9 kB]
 Get:4 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 hicolor-icon-theme all 0.17-2 [9,976 B]
 Get:5 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 humanity-icon-theme all 0.6.16 [1,282 kB]
-Get:6 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 ubuntu-mono all 24.04-0ubuntu1 [151 kB]
-Get:7 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 adwaita-icon-theme all 46.0-1 [723 kB]
-Get:8 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 at-spi2-common all 2.52.0-1build1 [8,674 B]
-Get:9 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxi6 amd64 2:1.8.1-1build1 [32.4 kB]
-Get:10 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libatspi2.0-0t64 amd64 2.52.0-1build1 [80.5 kB]
-Get:11 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 x11-common all 1:7.7+23ubuntu3 [21.7 kB]
-Get:12 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxtst6 amd64 2:1.2.3-1.1build1 [12.6 kB]
-Get:13 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libdconf1 amd64 0.40.0-4build2 [39.4 kB]
-Get:14 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 dconf-service amd64 0.40.0-4build2 [27.5 kB]
-Get:15 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 dconf-gsettings-backend amd64 0.40.0-4build2 [22.1 kB]
-Get:16 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 session-migration amd64 0.3.9build1 [9,034 B]
-Get:17 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 gsettings-desktop-schemas all 46.1-0ubuntu1 [35.6 kB]
-Get:18 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 at-spi2-core amd64 2.52.0-1build1 [56.6 kB]
-Get:19 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 fontconfig amd64 2.15.0-1.1ubuntu2 [180 kB]
-Get:20 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libdbusmenu-glib4 amd64 18.10.20180917~bzr492+repack1-3.1ubuntu5 [43.0 kB]
-Get:21 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libatk1.0-0t64 amd64 2.52.0-1build1 [55.3 kB]
-Get:22 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libatk-bridge2.0-0t64 amd64 2.52.0-1build1 [66.0 kB]
-Get:23 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libpixman-1-0 amd64 0.42.2-1build1 [279 kB]
-Get:24 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxcb-render0 amd64 1.15-1ubuntu2 [16.2 kB]
-Get:25 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxcb-shm0 amd64 1.15-1ubuntu2 [5,756 B]
-Get:26 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxrender1 amd64 1:0.9.10-1.1build1 [19.0 kB]
-Get:27 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libcairo2 amd64 1.18.0-3build1 [566 kB]
-Get:28 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libcairo-gobject2 amd64 1.18.0-3build1 [127 kB]
-Get:29 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 liblcms2-2 amd64 2.14-2build1 [161 kB]
-Get:30 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libcolord2 amd64 1.4.7-1build2 [149 kB]
-Get:31 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libavahi-common-data amd64 0.8-13ubuntu6 [29.7 kB]
-Get:32 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libavahi-common3 amd64 0.8-13ubuntu6 [23.3 kB]
-Get:33 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libavahi-client3 amd64 0.8-13ubuntu6 [26.8 kB]
-Get:34 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 libcups2t64 amd64 2.4.7-1.2ubuntu7.3 [272 kB]
-Get:35 https://repository.mullvad.net/deb/stable noble/main amd64 mullvad-vpn amd64 2025.7 [91.1 MB]
+Get:6 https://repository.mullvad.net/deb/stable noble/main amd64 mullvad-vpn amd64 2025.7 [91.1 MB]
+Get:7 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 ubuntu-mono all 24.04-0ubuntu1 [151 kB]
+Get:8 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 adwaita-icon-theme all 46.0-1 [723 kB]
+Get:9 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 at-spi2-common all 2.52.0-1build1 [8,674 B]
+Get:10 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxi6 amd64 2:1.8.1-1build1 [32.4 kB]
+Get:11 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libatspi2.0-0t64 amd64 2.52.0-1build1 [80.5 kB]
+Get:12 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 x11-common all 1:7.7+23ubuntu3 [21.7 kB]
+Get:13 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxtst6 amd64 2:1.2.3-1.1build1 [12.6 kB]
+Get:14 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libdconf1 amd64 0.40.0-4build2 [39.4 kB]
+Get:15 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 dconf-service amd64 0.40.0-4build2 [27.5 kB]
+Get:16 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 dconf-gsettings-backend amd64 0.40.0-4build2 [22.1 kB]
+Get:17 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 session-migration amd64 0.3.9build1 [9,034 B]
+Get:18 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 gsettings-desktop-schemas all 46.1-0ubuntu1 [35.6 kB]
+Get:19 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 at-spi2-core amd64 2.52.0-1build1 [56.6 kB]
+Get:20 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 fontconfig amd64 2.15.0-1.1ubuntu2 [180 kB]
+Get:21 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libdbusmenu-glib4 amd64 18.10.20180917~bzr492+repack1-3.1ubuntu5 [43.0 kB]
+Get:22 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libatk1.0-0t64 amd64 2.52.0-1build1 [55.3 kB]
+Get:23 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libatk-bridge2.0-0t64 amd64 2.52.0-1build1 [66.0 kB]
+Get:24 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libpixman-1-0 amd64 0.42.2-1build1 [279 kB]
+Get:25 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxcb-render0 amd64 1.15-1ubuntu2 [16.2 kB]
+Get:26 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxcb-shm0 amd64 1.15-1ubuntu2 [5,756 B]
+Get:27 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libxrender1 amd64 1:0.9.10-1.1build1 [19.0 kB]
+Get:28 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libcairo2 amd64 1.18.0-3build1 [566 kB]
+Get:29 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libcairo-gobject2 amd64 1.18.0-3build1 [127 kB]
+Get:30 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 liblcms2-2 amd64 2.14-2build1 [161 kB]
+Get:31 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libcolord2 amd64 1.4.7-1build2 [149 kB]
+Get:32 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libavahi-common-data amd64 0.8-13ubuntu6 [29.7 kB]
+Get:33 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libavahi-common3 amd64 0.8-13ubuntu6 [23.3 kB]
+Get:34 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libavahi-client3 amd64 0.8-13ubuntu6 [26.8 kB]
+Get:35 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 libcups2t64 amd64 2.4.7-1.2ubuntu7.3 [272 kB]
 Get:36 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libepoxy0 amd64 1.5.10-1build1 [220 kB]
 Get:37 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libgraphite2-3 amd64 1.3.14-2build1 [73.0 kB]
 Get:38 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libharfbuzz0b amd64 8.3.0-2build2 [469 kB]
@@ -1283,7 +1283,7 @@ Get:58 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 libgdk-pixbu
 Get:59 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 libgtk-3-bin amd64 3.24.41-4ubuntu1.3 [73.9 kB]
 Get:60 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 librsvg2-2 amd64 2.58.0+dfsg-1build1 [2,135 kB]
 Get:61 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 librsvg2-common amd64 2.58.0+dfsg-1build1 [11.8 kB]
-Fetched 104 MB in 2s (47.7 MB/s)
+Fetched 104 MB in 2s (43.1 MB/s)
 Selecting previously unselected package libgdk-pixbuf2.0-common.
 (Reading database ... 90105 files and directories currently installed.)
 Preparing to unpack .../00-libgdk-pixbuf2.0-common_2.42.10+dfsg-3ubuntu3.1_all.deb ...
@@ -1555,26 +1555,26 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:52:07 - Command succeeded on attempt 1
+2025-07-13 10:03:57 - Command succeeded on attempt 1
 [SUCCESS] Mullvad VPN installed
-2025-07-11 14:52:07 - SUCCESS: Mullvad VPN installed
+2025-07-13 10:03:57 - SUCCESS: Mullvad VPN installed
 [INFO] Installing Node.js LTS...
-2025-07-11 14:52:07 - INFO: Installing Node.js LTS...
+2025-07-13 10:03:57 - INFO: Installing Node.js LTS...
 [INFO] Downloading NodeSource setup script...
-2025-07-11 14:52:07 - INFO: Downloading NodeSource setup script...
-2025-07-11 14:52:07 - Installing pre-requisites
+2025-07-13 10:03:57 - INFO: Downloading NodeSource setup script...
+2025-07-13 10:03:57 - Installing pre-requisites
 Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
 Hit:2 http://pl.archive.ubuntu.com/ubuntu noble InRelease
 Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
 Hit:4 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
-Hit:5 https://repository.mullvad.net/deb/stable noble InRelease
-Hit:6 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:6 https://repository.mullvad.net/deb/stable noble InRelease
 Hit:7 https://cli.github.com/packages stable InRelease
 Get:8 https://pkgs.tailscale.com/stable/ubuntu noble InRelease
-Fetched 6,578 B in 1s (12.4 kB/s)
+Fetched 6,578 B in 0s (13.2 kB/s)
 Reading package lists...
 Reading package lists...
 Building dependency tree...
@@ -1585,28 +1585,28 @@ curl is already the newest version (8.5.0-2ubuntu10.6).
 gnupg is already the newest version (2.4.4-2ubuntu17.3).
 0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
 Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
-Hit:2 http://pl.archive.ubuntu.com/ubuntu noble InRelease
-Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
-Hit:4 https://repository.mullvad.net/deb/stable noble InRelease
-Get:5 https://deb.nodesource.com/node_22.x nodistro InRelease [12.1 kB]
-Hit:6 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
-Get:7 https://deb.nodesource.com/node_22.x nodistro/main amd64 Packages [6,970 B]
-Hit:8 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
-Hit:9 https://cli.github.com/packages stable InRelease
+Hit:2 http://security.ubuntu.com/ubuntu noble-security InRelease
+Get:3 https://deb.nodesource.com/node_22.x nodistro InRelease [12.1 kB]
+Get:4 https://deb.nodesource.com/node_22.x nodistro/main amd64 Packages [6,970 B]
+Hit:5 https://repository.mullvad.net/deb/stable noble InRelease
+Hit:6 http://pl.archive.ubuntu.com/ubuntu noble InRelease
+Hit:7 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:8 https://cli.github.com/packages stable InRelease
+Hit:9 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
 Get:10 https://pkgs.tailscale.com/stable/ubuntu noble InRelease
-Fetched 25.7 kB in 0s (52.1 kB/s)
+Fetched 25.7 kB in 1s (48.2 kB/s)
 Reading package lists...
-2025-07-11 14:52:10 - Repository configured successfully.
-2025-07-11 14:52:10 - To install Node.js, run: apt-get install nodejs -y
-2025-07-11 14:52:10 - You can use N|solid Runtime as a node.js alternative
-2025-07-11 14:52:10 - To install N|solid Runtime, run: apt-get install nsolid -y
+2025-07-13 10:03:59 - Repository configured successfully.
+2025-07-13 10:03:59 - To install Node.js, run: apt-get install nodejs -y
+2025-07-13 10:03:59 - You can use N|solid Runtime as a node.js alternative
+2025-07-13 10:03:59 - To install N|solid Runtime, run: apt-get install nsolid -y
 
 [SUCCESS] NodeSource repository added successfully
-2025-07-11 14:52:10 - SUCCESS: NodeSource repository added successfully
+2025-07-13 10:03:59 - SUCCESS: NodeSource repository added successfully
 [INFO] Installing Node.js package...
-2025-07-11 14:52:10 - INFO: Installing Node.js package...
-2025-07-11 14:52:10 - COMMAND: sudo apt install -y nodejs
-2025-07-11 14:52:10 - Attempt 1 of 3: sudo apt install -y nodejs
+2025-07-13 10:03:59 - INFO: Installing Node.js package...
+2025-07-13 10:03:59 - COMMAND: sudo apt install -y nodejs
+2025-07-13 10:03:59 - Attempt 1 of 3: sudo apt install -y nodejs
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -1619,7 +1619,7 @@ The following NEW packages will be installed:
 Need to get 37.0 MB of archives.
 After this operation, 225 MB of additional disk space will be used.
 Get:1 https://deb.nodesource.com/node_22.x nodistro/main amd64 nodejs amd64 22.17.0-1nodesource1 [37.0 MB]
-Fetched 37.0 MB in 1s (55.4 MB/s)
+Fetched 37.0 MB in 0s (78.2 MB/s)
 Selecting previously unselected package nodejs.
 (Reading database ... 103348 files and directories currently installed.)
 Preparing to unpack .../nodejs_22.17.0-1nodesource1_amd64.deb ...
@@ -1641,34 +1641,34 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:52:15 - Command succeeded on attempt 1
+2025-07-13 10:04:05 - Command succeeded on attempt 1
 [SUCCESS] Node.js installed: v22.17.0
-2025-07-11 14:52:15 - SUCCESS: Node.js installed: v22.17.0
+2025-07-13 10:04:05 - SUCCESS: Node.js installed: v22.17.0
 [INFO] Installing Infisical CLI...
-2025-07-11 14:52:15 - INFO: Installing Infisical CLI...
+2025-07-13 10:04:05 - INFO: Installing Infisical CLI...
 [INFO] Attempting Infisical installation for AMD64...
-2025-07-11 14:52:15 - INFO: Attempting Infisical installation for AMD64...
+2025-07-13 10:04:05 - INFO: Attempting Infisical installation for AMD64...
 [INFO] Setting up npm global directory...
-2025-07-11 14:52:15 - INFO: Setting up npm global directory...
+2025-07-13 10:04:05 - INFO: Setting up npm global directory...
 [INFO] Installing Infisical CLI via npm...
-2025-07-11 14:52:16 - INFO: Installing Infisical CLI via npm...
+2025-07-13 10:04:05 - INFO: Installing Infisical CLI via npm...
 
 added 13 packages in 4s
 [SUCCESS] Infisical CLI installed via npm
-2025-07-11 14:52:20 - SUCCESS: Infisical CLI installed via npm
+2025-07-13 10:04:09 - SUCCESS: Infisical CLI installed via npm
 [SUCCESS] Infisical CLI verified and working
-2025-07-11 14:52:20 - SUCCESS: Infisical CLI verified and working
+2025-07-13 10:04:09 - SUCCESS: Infisical CLI verified and working
 [SUCCESS] Infisical CLI installation completed
-2025-07-11 14:52:20 - SUCCESS: Infisical CLI installation completed
+2025-07-13 10:04:09 - SUCCESS: Infisical CLI installation completed
 [SUCCESS] Infisical CLI verified: infisical version 0.41.89
-2025-07-11 14:52:20 - SUCCESS: Infisical CLI verified: infisical version 0.41.89
+2025-07-13 10:04:09 - SUCCESS: Infisical CLI verified: infisical version 0.41.89
 [INFO] Installing additional development tools...
-2025-07-11 14:52:20 - INFO: Installing additional development tools...
-2025-07-11 14:52:20 - COMMAND: sudo apt install -y python3 python3-pip python3-venv jq tmux screen rsync
-2025-07-11 14:52:20 - Attempt 1 of 3: sudo apt install -y python3 python3-pip python3-venv jq tmux screen rsync
+2025-07-13 10:04:09 - INFO: Installing additional development tools...
+2025-07-13 10:04:09 - COMMAND: sudo apt install -y python3 python3-pip python3-venv jq tmux screen rsync
+2025-07-13 10:04:09 - Attempt 1 of 3: sudo apt install -y python3 python3-pip python3-venv jq tmux screen rsync
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -1716,7 +1716,7 @@ Get:13 http://pl.archive.ubuntu.com/ubuntu noble-updates/universe amd64 python3-
 Get:14 http://pl.archive.ubuntu.com/ubuntu noble-updates/universe amd64 python3-setuptools-whl all 68.1.2-2ubuntu1.2 [716 kB]
 Get:15 http://pl.archive.ubuntu.com/ubuntu noble-updates/universe amd64 python3.12-venv amd64 3.12.3-1ubuntu0.7 [5,680 B]
 Get:16 http://pl.archive.ubuntu.com/ubuntu noble-updates/universe amd64 python3-venv amd64 3.12.3-0ubuntu2 [1,034 B]
-Fetched 11.6 MB in 1s (9,233 kB/s)
+Fetched 11.6 MB in 1s (9,506 kB/s)
 Selecting previously unselected package javascript-common.
 (Reading database ... 109250 files and directories currently installed.)
 Preparing to unpack .../00-javascript-common_11+nmu1_all.deb ...
@@ -1798,48 +1798,48 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:52:26 - Command succeeded on attempt 1
+2025-07-13 10:04:16 - Command succeeded on attempt 1
 [SUCCESS] Development tools installed
-2025-07-11 14:52:26 - SUCCESS: Development tools installed
+2025-07-13 10:04:16 - SUCCESS: Development tools installed
 [INFO] Installing Google Cloud CLI...
-2025-07-11 14:52:26 - INFO: Installing Google Cloud CLI...
+2025-07-13 10:04:16 - INFO: Installing Google Cloud CLI...
 [INFO] Adding Google Cloud SDK repository...
-2025-07-11 14:52:26 - INFO: Adding Google Cloud SDK repository...
+2025-07-13 10:04:16 - INFO: Adding Google Cloud SDK repository...
 deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main
 [INFO] Updating package lists after adding Google Cloud SDK repository...
-2025-07-11 14:52:26 - INFO: Updating package lists after adding Google Cloud SDK repository...
-2025-07-11 14:52:26 - COMMAND: sudo apt update
-2025-07-11 14:52:26 - Attempt 1 of 3: sudo apt update
+2025-07-13 10:04:16 - INFO: Updating package lists after adding Google Cloud SDK repository...
+2025-07-13 10:04:16 - COMMAND: sudo apt update
+2025-07-13 10:04:16 - Attempt 1 of 3: sudo apt update
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
 Hit:1 https://download.docker.com/linux/ubuntu noble InRelease
 Hit:2 https://deb.nodesource.com/node_22.x nodistro InRelease
 Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
-Hit:4 http://pl.archive.ubuntu.com/ubuntu noble InRelease
-Hit:5 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
-Hit:6 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
-Hit:7 https://repository.mullvad.net/deb/stable noble InRelease
-Get:8 https://packages.cloud.google.com/apt cloud-sdk InRelease [1,618 B]
+Hit:4 https://repository.mullvad.net/deb/stable noble InRelease
+Hit:5 http://pl.archive.ubuntu.com/ubuntu noble InRelease
+Get:6 https://packages.cloud.google.com/apt cloud-sdk InRelease [1,618 B]
+Hit:7 http://pl.archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:8 http://pl.archive.ubuntu.com/ubuntu noble-backports InRelease
 Hit:9 https://cli.github.com/packages stable InRelease
 Get:10 https://pkgs.tailscale.com/stable/ubuntu noble InRelease
-Get:11 https://packages.cloud.google.com/apt cloud-sdk/main amd64 Packages [3,953 kB]
-Get:12 https://packages.cloud.google.com/apt cloud-sdk/main all Packages [1,761 kB]
-Fetched 5,723 kB in 1s (5,496 kB/s)
+Get:11 https://packages.cloud.google.com/apt cloud-sdk/main all Packages [1,761 kB]
+Get:12 https://packages.cloud.google.com/apt cloud-sdk/main amd64 Packages [3,953 kB]
+Fetched 5,723 kB in 1s (5,031 kB/s)
 Reading package lists...
 Building dependency tree...
 Reading state information...
 1 package can be upgraded. Run 'apt list --upgradable' to see it.
-2025-07-11 14:52:29 - Command succeeded on attempt 1
+2025-07-13 10:04:18 - Command succeeded on attempt 1
 [SUCCESS] Package lists updated successfully
-2025-07-11 14:52:29 - SUCCESS: Package lists updated successfully
+2025-07-13 10:04:18 - SUCCESS: Package lists updated successfully
 [INFO] Installing Google Cloud CLI package...
-2025-07-11 14:52:29 - INFO: Installing Google Cloud CLI package...
-2025-07-11 14:52:29 - COMMAND: sudo apt install -y google-cloud-cli
-2025-07-11 14:52:29 - Attempt 1 of 3: sudo apt install -y google-cloud-cli
+2025-07-13 10:04:18 - INFO: Installing Google Cloud CLI package...
+2025-07-13 10:04:18 - COMMAND: sudo apt install -y google-cloud-cli
+2025-07-13 10:04:18 - Attempt 1 of 3: sudo apt install -y google-cloud-cli
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -1859,7 +1859,7 @@ Need to get 162 MB of archives.
 After this operation, 662 MB of additional disk space will be used.
 Get:1 https://packages.cloud.google.com/apt cloud-sdk/main amd64 google-cloud-cli amd64 529.0.0-0 [124 MB]
 Get:2 https://packages.cloud.google.com/apt cloud-sdk/main amd64 google-cloud-cli-anthoscli amd64 529.0.0-0 [37.7 MB]
-Fetched 162 MB in 2s (65.9 MB/s)
+Fetched 162 MB in 2s (65.2 MB/s)
 Selecting previously unselected package google-cloud-cli.
 (Reading database ... 110379 files and directories currently installed.)
 Preparing to unpack .../google-cloud-cli_529.0.0-0_amd64.deb ...
@@ -1886,16 +1886,16 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:53:02 - Command succeeded on attempt 1
+2025-07-13 10:04:52 - Command succeeded on attempt 1
 [SUCCESS] Google Cloud CLI installed successfully
-2025-07-11 14:53:02 - SUCCESS: Google Cloud CLI installed successfully
+2025-07-13 10:04:52 - SUCCESS: Google Cloud CLI installed successfully
 [INFO] Installing QEMU virtualization...
-2025-07-11 14:53:02 - INFO: Installing QEMU virtualization...
-2025-07-11 14:53:02 - COMMAND: sudo apt install -y qemu-kvm qemu-system qemu-utils libvirt-daemon-system libvirt-clients bridge-utils virt-manager
-2025-07-11 14:53:02 - Attempt 1 of 3: sudo apt install -y qemu-kvm qemu-system qemu-utils libvirt-daemon-system libvirt-clients bridge-utils virt-manager
+2025-07-13 10:04:52 - INFO: Installing QEMU virtualization...
+2025-07-13 10:04:52 - COMMAND: sudo apt install -y qemu-kvm qemu-system qemu-utils libvirt-daemon-system libvirt-clients bridge-utils virt-manager
+2025-07-13 10:04:52 - Attempt 1 of 3: sudo apt install -y qemu-kvm qemu-system qemu-utils libvirt-daemon-system libvirt-clients bridge-utils virt-manager
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -2218,7 +2218,7 @@ Get:200 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 ovmf all 20
 Get:201 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-efi-aarch64 all 2024.02-2ubuntu0.4 [4,095 kB]
 Get:202 http://pl.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-efi-arm all 2024.02-2ubuntu0.4 [774 kB]
 Preconfiguring packages ...
-Fetched 230 MB in 9s (26.5 MB/s)
+Fetched 230 MB in 7s (34.2 MB/s)
 (Reading database ... 161120 files and directories currently installed.)
 Removing libappindicator3-1 (12.10.1+20.10.20200706.1-0ubuntu5) ...
 Selecting previously unselected package acl.
@@ -3078,18 +3078,18 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:53:53 - Command succeeded on attempt 1
+2025-07-13 10:05:41 - Command succeeded on attempt 1
 [SUCCESS] QEMU and virtualization tools installed
-2025-07-11 14:53:53 - SUCCESS: QEMU and virtualization tools installed
+2025-07-13 10:05:41 - SUCCESS: QEMU and virtualization tools installed
 [INFO] Added user to libvirt and kvm groups
-2025-07-11 14:53:53 - INFO: Added user to libvirt and kvm groups
+2025-07-13 10:05:41 - INFO: Added user to libvirt and kvm groups
 [INFO] Installing ZSH and plugins...
-2025-07-11 14:53:53 - INFO: Installing ZSH and plugins...
-2025-07-11 14:53:53 - COMMAND: sudo apt install -y zsh
-2025-07-11 14:53:53 - Attempt 1 of 3: sudo apt install -y zsh
+2025-07-13 10:05:41 - INFO: Installing ZSH and plugins...
+2025-07-13 10:05:41 - COMMAND: sudo apt install -y zsh
+2025-07-13 10:05:41 - Attempt 1 of 3: sudo apt install -y zsh
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -3107,7 +3107,7 @@ Need to get 4,985 kB of archives.
 After this operation, 19.1 MB of additional disk space will be used.
 Get:1 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 zsh-common all 5.9-6ubuntu2 [4,173 kB]
 Get:2 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 zsh amd64 5.9-6ubuntu2 [812 kB]
-Fetched 4,985 kB in 0s (15.0 MB/s)
+Fetched 4,985 kB in 1s (4,744 kB/s)
 Selecting previously unselected package zsh-common.
 (Reading database ... 166074 files and directories currently installed.)
 Preparing to unpack .../zsh-common_5.9-6ubuntu2_all.deb ...
@@ -3134,16 +3134,16 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:53:58 - Command succeeded on attempt 1
+2025-07-13 10:05:47 - Command succeeded on attempt 1
 [SUCCESS] ZSH installed
-2025-07-11 14:53:58 - SUCCESS: ZSH installed
+2025-07-13 10:05:47 - SUCCESS: ZSH installed
 [INFO] Installing ZSH plugins...
-2025-07-11 14:53:58 - INFO: Installing ZSH plugins...
-2025-07-11 14:53:58 - COMMAND: sudo apt install -y zsh-autosuggestions zsh-syntax-highlighting
-2025-07-11 14:53:58 - Attempt 1 of 3: sudo apt install -y zsh-autosuggestions zsh-syntax-highlighting
+2025-07-13 10:05:47 - INFO: Installing ZSH plugins...
+2025-07-13 10:05:47 - COMMAND: sudo apt install -y zsh-autosuggestions zsh-syntax-highlighting
+2025-07-13 10:05:47 - Attempt 1 of 3: sudo apt install -y zsh-autosuggestions zsh-syntax-highlighting
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -3157,7 +3157,7 @@ Need to get 47.2 kB of archives.
 After this operation, 194 kB of additional disk space will be used.
 Get:1 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 zsh-autosuggestions all 0.7.0-1 [14.9 kB]
 Get:2 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 zsh-syntax-highlighting all 0.7.1-2 [32.3 kB]
-Fetched 47.2 kB in 0s (94.6 kB/s)
+Fetched 47.2 kB in 0s (333 kB/s)
 Selecting previously unselected package zsh-autosuggestions.
 (Reading database ... 167586 files and directories currently installed.)
 Preparing to unpack .../zsh-autosuggestions_0.7.0-1_all.deb ...
@@ -3182,24 +3182,24 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:54:00 - Command succeeded on attempt 1
+2025-07-13 10:05:48 - Command succeeded on attempt 1
 [SUCCESS] ZSH plugins installed via apt
-2025-07-11 14:54:00 - SUCCESS: ZSH plugins installed via apt
+2025-07-13 10:05:48 - SUCCESS: ZSH plugins installed via apt
 [INFO] Creating basic .zshrc configuration...
-2025-07-11 14:54:00 - INFO: Creating basic .zshrc configuration...
+2025-07-13 10:05:48 - INFO: Creating basic .zshrc configuration...
 [SUCCESS] Basic .zshrc configuration created
-2025-07-11 14:54:00 - SUCCESS: Basic .zshrc configuration created
+2025-07-13 10:05:48 - SUCCESS: Basic .zshrc configuration created
 [INFO] To make ZSH your default shell, run: chsh -s /usr/bin/zsh
-2025-07-11 14:54:00 - INFO: To make ZSH your default shell, run: chsh -s /usr/bin/zsh
+2025-07-13 10:05:48 - INFO: To make ZSH your default shell, run: chsh -s /usr/bin/zsh
 [INFO] Installing browser automation tools...
-2025-07-11 14:54:00 - INFO: Installing browser automation tools...
+2025-07-13 10:05:48 - INFO: Installing browser automation tools...
 [INFO] Installing Chromium and automation dependencies...
-2025-07-11 14:54:00 - INFO: Installing Chromium and automation dependencies...
-2025-07-11 14:54:00 - COMMAND: sudo apt install -y chromium-browser xvfb fonts-liberation libxss1 libappindicator3-1 libindicator7 xdg-utils
-2025-07-11 14:54:00 - Attempt 1 of 3: sudo apt install -y chromium-browser xvfb fonts-liberation libxss1 libappindicator3-1 libindicator7 xdg-utils
+2025-07-13 10:05:48 - INFO: Installing Chromium and automation dependencies...
+2025-07-13 10:05:48 - COMMAND: sudo apt install -y chromium-browser xvfb fonts-liberation libxss1 libappindicator3-1 libindicator7 xdg-utils
+2025-07-13 10:05:48 - Attempt 1 of 3: sudo apt install -y chromium-browser xvfb fonts-liberation libxss1 libappindicator3-1 libindicator7 xdg-utils
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -3338,7 +3338,7 @@ Get:72 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libgles2 amd64 1.7.0
 Get:73 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 zutty amd64 0.14.8.20231210+dfsg1-1 [185 kB]
 Get:74 http://pl.archive.ubuntu.com/ubuntu noble/main amd64 libauthen-sasl-perl all 2.1700-1 [42.9 kB]
 Preconfiguring packages ...
-Fetched 15.7 MB in 2s (7,681 kB/s)
+Fetched 15.7 MB in 2s (7,214 kB/s)
 (Reading database ... 167627 files and directories currently installed.)
 Removing gir1.2-ayatanaappindicator3-0.1 (0.5.93-1build3) ...
 Removing libayatana-appindicator3-1 (0.5.93-1build3) ...
@@ -3348,7 +3348,7 @@ Preparing to unpack .../00-chromium-browser_2%3a1snap1-0ubuntu2_amd64.deb ...
 => Installing the chromium snap
 ==> Checking connectivity with the snap store
 ==> Installing the chromium snap
-2025-07-11T14:54:07Z INFO Waiting for automatic snapd restart...
+2025-07-13T10:05:55Z INFO Waiting for automatic snapd restart...
 chromium 138.0.7204.100 from Canonical✓ installed
 => Snap installation complete
 Unpacking chromium-browser (2:1snap1-0ubuntu2) ...
@@ -3668,16 +3668,16 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:55:08 - Command succeeded on attempt 1
+2025-07-13 10:07:02 - Command succeeded on attempt 1
 [SUCCESS] Chromium and X11 dependencies installed
-2025-07-11 14:55:08 - SUCCESS: Chromium and X11 dependencies installed
+2025-07-13 10:07:02 - SUCCESS: Chromium and X11 dependencies installed
 [INFO] Installing ChromeDriver...
-2025-07-11 14:55:08 - INFO: Installing ChromeDriver...
-2025-07-11 14:55:08 - COMMAND: sudo apt install -y chromium-chromedriver
-2025-07-11 14:55:08 - Attempt 1 of 3: sudo apt install -y chromium-chromedriver
+2025-07-13 10:07:02 - INFO: Installing ChromeDriver...
+2025-07-13 10:07:02 - COMMAND: sudo apt install -y chromium-chromedriver
+2025-07-13 10:07:02 - Attempt 1 of 3: sudo apt install -y chromium-chromedriver
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -3693,7 +3693,7 @@ The following NEW packages will be installed:
 Need to get 2,308 B of archives.
 After this operation, 18.4 kB of additional disk space will be used.
 Get:1 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 chromium-chromedriver amd64 2:1snap1-0ubuntu2 [2,308 B]
-Fetched 2,308 B in 0s (11.9 kB/s)
+Fetched 2,308 B in 0s (12.0 kB/s)
 Selecting previously unselected package chromium-chromedriver.
 (Reading database ... 169505 files and directories currently installed.)
 Preparing to unpack .../chromium-chromedriver_2%3a1snap1-0ubuntu2_amd64.deb ...
@@ -3714,43 +3714,43 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:55:10 - Command succeeded on attempt 1
+2025-07-13 10:07:04 - Command succeeded on attempt 1
 [SUCCESS] ChromeDriver installed via apt
-2025-07-11 14:55:10 - SUCCESS: ChromeDriver installed via apt
+2025-07-13 10:07:04 - SUCCESS: ChromeDriver installed via apt
 [INFO] Installing Python automation packages...
-2025-07-11 14:55:10 - INFO: Installing Python automation packages...
+2025-07-13 10:07:04 - INFO: Installing Python automation packages...
 [WARNING] Some Python packages may have failed to install
-2025-07-11 14:55:10 - WARNING: Some Python packages may have failed to install
+2025-07-13 10:07:04 - WARNING: Some Python packages may have failed to install
 [INFO] Installing Node.js automation packages...
-2025-07-11 14:55:10 - INFO: Installing Node.js automation packages...
+2025-07-13 10:07:04 - INFO: Installing Node.js automation packages...
 
 added 99 packages in 10s
 
 7 packages are looking for funding
   run `npm fund` for details
 [SUCCESS] Puppeteer and Playwright installed globally
-2025-07-11 14:55:20 - SUCCESS: Puppeteer and Playwright installed globally
+2025-07-13 10:07:14 - SUCCESS: Puppeteer and Playwright installed globally
 [INFO] Setting up browser automation environment...
-2025-07-11 14:55:20 - INFO: Setting up browser automation environment...
+2025-07-13 10:07:14 - INFO: Setting up browser automation environment...
 [SUCCESS] Browser automation environment set up
-2025-07-11 14:55:20 - SUCCESS: Browser automation environment set up
+2025-07-13 10:07:14 - SUCCESS: Browser automation environment set up
 [INFO] Automation scripts created in ~/browser_automation/
-2025-07-11 14:55:20 - INFO: Automation scripts created in ~/browser_automation/
+2025-07-13 10:07:14 - INFO: Automation scripts created in ~/browser_automation/
 [SUCCESS] Browser automation tools installation completed
-2025-07-11 14:55:20 - SUCCESS: Browser automation tools installation completed
+2025-07-13 10:07:14 - SUCCESS: Browser automation tools installation completed
 [INFO] Example scripts available in ~/browser_automation/scripts/
-2025-07-11 14:55:20 - INFO: Example scripts available in ~/browser_automation/scripts/
+2025-07-13 10:07:14 - INFO: Example scripts available in ~/browser_automation/scripts/
 [INFO] Run 'cd ~/browser_automation && cat README.md' for usage instructions
-2025-07-11 14:55:20 - INFO: Run 'cd ~/browser_automation && cat README.md' for usage instructions
+2025-07-13 10:07:14 - INFO: Run 'cd ~/browser_automation && cat README.md' for usage instructions
 [INFO] Installing Yazi file manager and dependencies...
-2025-07-11 14:55:20 - INFO: Installing Yazi file manager and dependencies...
+2025-07-13 10:07:14 - INFO: Installing Yazi file manager and dependencies...
 [INFO] Installing Yazi dependencies...
-2025-07-11 14:55:20 - INFO: Installing Yazi dependencies...
-2025-07-11 14:55:20 - COMMAND: sudo apt install -y file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip
-2025-07-11 14:55:20 - Attempt 1 of 3: sudo apt install -y file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip
+2025-07-13 10:07:14 - INFO: Installing Yazi dependencies...
+2025-07-13 10:07:14 - COMMAND: sudo apt install -y file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip
+2025-07-13 10:07:14 - Attempt 1 of 3: sudo apt install -y file ffmpeg p7zip-full jq poppler-utils fd-find ripgrep fzf zoxide imagemagick xclip
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -3941,7 +3941,7 @@ Get:116 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 xclip amd64 0.1
 Get:117 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 zoxide amd64 0.9.3-1 [441 kB]
 Get:118 http://pl.archive.ubuntu.com/ubuntu noble/universe amd64 pocketsphinx-en-us all 0.8.0+real5prealpha+1-15ubuntu5 [27.4 MB]
 Preconfiguring packages ...
-Fetched 121 MB in 5s (22.8 MB/s)
+Fetched 121 MB in 2s (63.4 MB/s)
 Selecting previously unselected package fonts-droid-fallback.
 (Reading database ... 169512 files and directories currently installed.)
 Preparing to unpack .../000-fonts-droid-fallback_1%3a6.0.1r16-1.1build1_all.deb ...
@@ -4460,22 +4460,22 @@ Service restarts being deferred:
 No containers need to be restarted.
 
 User sessions running outdated binaries:
- wgus0 @ user manager service: systemd[1418]
+ wgus0 @ user manager service: systemd[1685]
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-2025-07-11 14:55:47 - Command succeeded on attempt 1
+2025-07-13 10:07:37 - Command succeeded on attempt 1
 [INFO] Created fd symlink for fdfind
-2025-07-11 14:55:47 - INFO: Created fd symlink for fdfind
+2025-07-13 10:07:37 - INFO: Created fd symlink for fdfind
 [INFO] Trying Yazi binary download...
-2025-07-11 14:55:47 - INFO: Trying Yazi binary download...
+2025-07-13 10:07:37 - INFO: Trying Yazi binary download...
 [INFO] Downloading Yazi v25.5.31 for x86_64-unknown-linux-gnu...
-2025-07-11 14:55:47 - INFO: Downloading Yazi v25.5.31 for x86_64-unknown-linux-gnu...
+2025-07-13 10:07:37 - INFO: Downloading Yazi v25.5.31 for x86_64-unknown-linux-gnu...
 [WARNING] Binary download failed for x86_64-unknown-linux-gnu
-2025-07-11 14:55:47 - WARNING: Binary download failed for x86_64-unknown-linux-gnu
+2025-07-13 10:07:38 - WARNING: Binary download failed for x86_64-unknown-linux-gnu
 [INFO] Binary installation failed, trying Rust/Cargo method...
-2025-07-11 14:55:47 - INFO: Binary installation failed, trying Rust/Cargo method...
+2025-07-13 10:07:38 - INFO: Binary installation failed, trying Rust/Cargo method...
 [INFO] Installing Rust/Cargo for Yazi...
-2025-07-11 14:55:47 - INFO: Installing Rust/Cargo for Yazi...
+2025-07-13 10:07:38 - INFO: Installing Rust/Cargo for Yazi...
 
   stable-x86_64-unknown-linux-gnu installed - rustc 1.88.0 (6b00bc388 2025-06-23)
 
@@ -4494,27 +4494,27 @@ This is usually done by running one of the following (note the leading DOT):
 source "$HOME/.cargo/env.fish"  # For fish
 source $"($nu.home-path)/.cargo/env.nu"  # For nushell
 [SUCCESS] Rust/Cargo installed
-2025-07-11 14:55:58 - SUCCESS: Rust/Cargo installed
+2025-07-13 10:08:01 - SUCCESS: Rust/Cargo installed
 [INFO] Installing Yazi via cargo...
-2025-07-11 14:55:58 - INFO: Installing Yazi via cargo...
+2025-07-13 10:08:01 - INFO: Installing Yazi via cargo...
 [INFO] Detected powerful system (32 cores, 61994MB RAM)
-2025-07-11 14:55:58 - INFO: Detected powerful system (32 cores, 61994MB RAM)
+2025-07-13 10:08:01 - INFO: Detected powerful system (32 cores, 61994MB RAM)
 [INFO] Using standard timeout (15 minutes) for Rust compilation
-2025-07-11 14:55:58 - INFO: Using standard timeout (15 minutes) for Rust compilation
+2025-07-13 10:08:01 - INFO: Using standard timeout (15 minutes) for Rust compilation
 [INFO] Building Yazi (this may take a while - up to 15 minutes)...
-2025-07-11 14:55:58 - INFO: Building Yazi (this may take a while - up to 15 minutes)...
+2025-07-13 10:08:01 - INFO: Building Yazi (this may take a while - up to 15 minutes)...
 Progress: Starting Rust compilation...
 Progress: Compilation finished.
 [SUCCESS] Yazi installed via cargo
-2025-07-11 14:56:52 - SUCCESS: Yazi installed via cargo
+2025-07-13 10:08:57 - SUCCESS: Yazi installed via cargo
 [SUCCESS] Yazi file manager installation completed
-2025-07-11 14:56:52 - SUCCESS: Yazi file manager installation completed
-[SUCCESS] Yazi verified: Yazi 25.5.31 (VERGEN_IDEMPOTENT_OUTPUT 2025-07-11)
-2025-07-11 14:56:52 - SUCCESS: Yazi verified: Yazi 25.5.31 (VERGEN_IDEMPOTENT_OUTPUT 2025-07-11)
+2025-07-13 10:08:57 - SUCCESS: Yazi file manager installation completed
+[SUCCESS] Yazi verified: Yazi 25.5.31 (VERGEN_IDEMPOTENT_OUTPUT 2025-07-13)
+2025-07-13 10:08:57 - SUCCESS: Yazi verified: Yazi 25.5.31 (VERGEN_IDEMPOTENT_OUTPUT 2025-07-13)
 [INFO] Installing Speedtest CLI...
-2025-07-11 14:56:52 - INFO: Installing Speedtest CLI...
+2025-07-13 10:08:57 - INFO: Installing Speedtest CLI...
 [INFO] Adding Ookla Speedtest repository...
-2025-07-11 14:56:52 - INFO: Adding Ookla Speedtest repository...
+2025-07-13 10:08:57 - INFO: Adding Ookla Speedtest repository...
 Detected operating system as Ubuntu/noble.
 Checking for curl...
 Detected curl...
@@ -4530,57 +4530,69 @@ Running apt-get update... done.
 
 The repository is setup! You can now install packages.
 [SUCCESS] Speedtest repository added
-2025-07-11 14:56:57 - SUCCESS: Speedtest repository added
-2025-07-11 14:56:57 - COMMAND: sudo apt install -y speedtest
-2025-07-11 14:56:57 - Attempt 1 of 3: sudo apt install -y speedtest
+2025-07-13 10:09:02 - SUCCESS: Speedtest repository added
+2025-07-13 10:09:02 - COMMAND: sudo apt install -y speedtest
+2025-07-13 10:09:02 - Attempt 1 of 3: sudo apt install -y speedtest
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
 Reading package lists...
 Building dependency tree...
 Reading state information...
+
+No apt package "speedtest", but there is a snap with that name.
+Try "snap install speedtest"
+
 E: Unable to locate package speedtest
 [WARNING] Attempt 1 failed. Retrying in 1s...
-2025-07-11 14:56:57 - WARNING: Attempt 1 failed. Retrying in 1s...
-2025-07-11 14:56:57 - Retrying in 1s...
-2025-07-11 14:56:58 - Attempt 2 of 3: sudo apt install -y speedtest
+2025-07-13 10:09:02 - WARNING: Attempt 1 failed. Retrying in 1s...
+2025-07-13 10:09:02 - Retrying in 1s...
+2025-07-13 10:09:03 - Attempt 2 of 3: sudo apt install -y speedtest
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
 Reading package lists...
 Building dependency tree...
 Reading state information...
+
+No apt package "speedtest", but there is a snap with that name.
+Try "snap install speedtest"
+
 E: Unable to locate package speedtest
 [WARNING] Attempt 2 failed. Retrying in 2s...
-2025-07-11 14:56:59 - WARNING: Attempt 2 failed. Retrying in 2s...
-2025-07-11 14:56:59 - Retrying in 2s...
-2025-07-11 14:57:01 - Attempt 3 of 3: sudo apt install -y speedtest
+2025-07-13 10:09:03 - WARNING: Attempt 2 failed. Retrying in 2s...
+2025-07-13 10:09:03 - Retrying in 2s...
+2025-07-13 10:09:05 - Attempt 3 of 3: sudo apt install -y speedtest
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
 Reading package lists...
 Building dependency tree...
 Reading state information...
+
+No apt package "speedtest", but there is a snap with that name.
+Try "snap install speedtest"
+
 E: Unable to locate package speedtest
 [ERROR] Command failed after 3 attempts: sudo apt install -y speedtest
-2025-07-11 14:57:01 - ERROR: Command failed after 3 attempts: sudo apt install -y speedtest
-2025-07-11 14:57:01 - FAILED: sudo apt install -y speedtest (after 3 attempts)
+2025-07-13 10:09:06 - ERROR: Command failed after 3 attempts: sudo apt install -y speedtest
+2025-07-13 10:09:06 - FAILED: sudo apt install -y speedtest (after 3 attempts)
 [INFO] Trying direct speedtest binary download...
-2025-07-11 14:57:01 - INFO: Trying direct speedtest binary download...
+2025-07-13 10:09:06 - INFO: Trying direct speedtest binary download...
 [SUCCESS] Speedtest CLI installed via direct download
-2025-07-11 14:57:02 - SUCCESS: Speedtest CLI installed via direct download
+2025-07-13 10:09:06 - SUCCESS: Speedtest CLI installed via direct download
 [SUCCESS] Speedtest CLI installation completed
-2025-07-11 14:57:02 - SUCCESS: Speedtest CLI installation completed
+2025-07-13 10:09:06 - SUCCESS: Speedtest CLI installation completed
 [SUCCESS] Speedtest CLI verified: Speedtest by Ookla 1.2.0.84 (ea6b6773cf) Linux/x86_64-linux-musl 6.8.0-63-generic x86_64
 
 The official command line client for testing the speed and performance
 of your internet connection.
-2025-07-11 14:57:02 - SUCCESS: Speedtest CLI verified: Speedtest by Ookla 1.2.0.84 (ea6b6773cf) Linux/x86_64-linux-musl 6.8.0-63-generic x86_64
+2025-07-13 10:09:06 - SUCCESS: Speedtest CLI verified: Speedtest by Ookla 1.2.0.84 (ea6b6773cf) Linux/x86_64-linux-musl 6.8.0-63-generic x86_64
 
 The official command line client for testing the speed and performance
 of your internet connection.
 [INFO] Cleaning up...
-2025-07-11 14:57:02 - INFO: Cleaning up...
+2025-07-13 10:09:06 - INFO: Cleaning up...
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
@@ -4602,13 +4614,13 @@ Reading package lists...
 Building dependency tree...
 Reading state information...
 [SUCCESS] Cleanup completed
-2025-07-11 14:57:03 - SUCCESS: Cleanup completed
+2025-07-13 10:09:08 - SUCCESS: Cleanup completed
 
 [SUCCESS] 🎉 Ubuntu Server One-Click Setup Complete!
-2025-07-11 14:57:03 - SUCCESS: 🎉 Ubuntu Server One-Click Setup Complete!
+2025-07-13 10:09:08 - SUCCESS: 🎉 Ubuntu Server One-Click Setup Complete!
 
 [INFO] Next steps for authentication and configuration:
-2025-07-11 14:57:03 - INFO: Next steps for authentication and configuration:
+2025-07-13 10:09:08 - INFO: Next steps for authentication and configuration:
 
 1. GitHub CLI Authentication:
    gh auth login
@@ -4652,7 +4664,7 @@ Reading state information...
     python3 undetected_selenium_example.py  # Anti-detection automation
 
 [INFO] Installation Summary:
-2025-07-11 14:57:03 - INFO: Installation Summary:
+2025-07-13 10:09:08 - INFO: Installation Summary:
 • Git: git version 2.43.0
 • GitHub CLI: gh version 2.75.0 (2025-07-09)
 • Docker: Docker version 28.3.2, build 578ccf6
@@ -4669,7 +4681,7 @@ Reading state information...
 • Node.js: v22.17.0
 • Python: Python 3.12.3
 • Zoxide: zoxide 0.9.3
-• Yazi file manager: Yazi 25.5.31 (VERGEN_IDEMPOTENT_OUTPUT 2025-07-11)
+• Yazi file manager: Yazi 25.5.31 (VERGEN_IDEMPOTENT_OUTPUT 2025-07-13)
 • Speedtest CLI: Speedtest by Ookla 1.2.0.84 (ea6b6773cf) Linux/x86_64-linux-musl 6.8.0-63-generic x86_64
 
 The official command line client for testing the speed and performance
@@ -4677,12 +4689,12 @@ of your internet connection.
 • tmux: tmux 3.4
 
 [WARNING] Please reboot or logout/login to ensure all group changes take effect.
-2025-07-11 14:57:04 - WARNING: Please reboot or logout/login to ensure all group changes take effect.
+2025-07-13 10:09:08 - WARNING: Please reboot or logout/login to ensure all group changes take effect.
 
 [INFO] Setup completed! The system will reboot in 10 seconds to ensure all changes take effect.
-2025-07-11 14:57:04 - INFO: Setup completed! The system will reboot in 10 seconds to ensure all changes take effect.
+2025-07-13 10:09:08 - INFO: Setup completed! The system will reboot in 10 seconds to ensure all changes take effect.
 [INFO] Press Ctrl+C to cancel the reboot if you want to stay logged in.
-2025-07-11 14:57:04 - INFO: Press Ctrl+C to cancel the reboot if you want to stay logged in.
+2025-07-13 10:09:08 - INFO: Press Ctrl+C to cancel the reboot if you want to stay logged in.
 
 Rebooting in 10 seconds...
 Rebooting in 9 seconds...
@@ -4695,20 +4707,22 @@ Rebooting in 3 seconds...
 Rebooting in 2 seconds...
 Rebooting in 1 seconds...
 [INFO] Rebooting now...
-2025-07-11 14:57:14 - INFO: Rebooting now...
+2025-07-13 10:09:18 - INFO: Rebooting now...
 
-Broadcast message from root@wgus0 on pts/1 (Fri 2025-07-11 14:57:14 UTC):
+Broadcast message from root@wgus0 on pts/1 (Sun 2025-07-13 10:09:18 UTC):
 
 The system will reboot now!
 
-2025-07-11 14:57:14 - === UBUNTU SETUP EXIT ===
-2025-07-11 14:57:14 - Exit code: 0
-2025-07-11 14:57:14 - Duration: 407 seconds
-2025-07-11 14:57:14 - Log file: /home/wgus0/.config/wgms-setup/ubuntu-setup-20250711-145027.log
+2025-07-13 10:09:18 - === UBUNTU SETUP EXIT ===
+2025-07-13 10:09:18 - Exit code: 0
+2025-07-13 10:09:18 - Duration: 430 seconds
+2025-07-13 10:09:18 - Log file: /home/wgus0/.config/wgms-setup/ubuntu-setup-20250713-100208.log
 [SUCCESS] 🎉 Setup completed successfully!
-2025-07-11 14:57:14 - SUCCESS: 🎉 Setup completed successfully!
-2025-07-11 14:57:14 - Platform script execution: SUCCESS
-2025-07-11 14:57:14 - === SCRIPT EXIT ===
+2025-07-13 10:09:18 - SUCCESS: 🎉 Setup completed successfully!
+2025-07-13 10:09:18 - Platform script execution: SUCCESS
+2025-07-13 10:09:18 - === SCRIPT EXIT ===
+2025-07-13 10:09:18 - Exit code: 0
+2025-07-13 10:09:18 - Duration: 436 seconds
 Connection to 192.168.1.11 closed by remote host.
 Connection to 192.168.1.11 closed.
 wgm0@WGm0 ~ %

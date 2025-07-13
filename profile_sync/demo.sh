@@ -1,0 +1,70 @@
+#!/bin/bash
+
+echo "🚀 Chrome Profile Sync - Demo"
+echo "============================="
+echo ""
+
+echo "This demo shows how to use the Chrome Profile Sync system."
+echo "Your Raspberry Pi will act as central storage for Chrome profiles."
+echo ""
+
+echo "📋 Prerequisites:"
+echo "• Raspberry Pi accessible at 192.168.1.9"
+echo "• SSH access to user 'wgr0' on the Pi"
+echo "• rsync installed on both machines"
+echo "• Google Chrome installed locally"
+echo ""
+
+echo "🔧 Setup Process:"
+echo "1. Run setup to configure SSH keys:"
+echo "   cd profile_sync && ./scripts/setup.sh"
+echo ""
+
+echo "2. Upload your current profile to Pi (from main machine):"
+echo "   ./scripts/upload.sh"
+echo ""
+
+echo "3. Download profile from Pi (on new machine):"
+echo "   ./scripts/download.sh"
+echo ""
+
+echo "4. Create local backup:"
+echo "   ./scripts/backup.sh"
+echo ""
+
+echo "5. Restore from backup:"
+echo "   ./scripts/restore.sh <backup_name>"
+echo ""
+
+echo "📁 File Structure:"
+echo "profile_sync/"
+echo "├── scripts/"
+echo "│   ├── setup.sh    # Initial setup & SSH keys"
+echo "│   ├── upload.sh   # Upload TO Pi"
+echo "│   ├── download.sh # Download FROM Pi"
+echo "│   ├── backup.sh   # Create local backup"
+echo "│   └── restore.sh  # Restore from backup"
+echo "├── config/"
+echo "│   ├── pi_config.sh      # Pi connection settings"
+echo "│   └── rsync_exclude.txt # Files to exclude"
+echo "└── backups/              # Local backups"
+echo ""
+
+echo "🛡️  Security Features:"
+echo "• SSH key authentication (no passwords)"
+echo "• Excludes cache/temporary files"
+echo "• Creates backups before sync"
+echo "• Validates connections before transfer"
+echo ""
+
+echo "💡 Usage Tips:"
+echo "• Always close Chrome before syncing"
+echo "• Upload from your main machine first"
+echo "• Download on new machines"
+echo "• Create backups before major changes"
+echo "• Check logs at ~/.config/chrome-sync.log"
+echo ""
+
+echo "🚀 Ready to start? Run:"
+echo "   cd profile_sync && ./scripts/setup.sh"
+echo "" 

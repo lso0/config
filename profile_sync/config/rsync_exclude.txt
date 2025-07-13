@@ -1,0 +1,94 @@
+# Chrome Cache Files and Temporary Data
+# These files are regenerated and should not be synced
+
+# Cache directories
+*/Cache/*
+*/Code Cache/*
+*/Media Cache/*
+*/GPUCache/*
+*/ShaderCache/*
+*/BrowserMetrics/*
+*/CrashPad/*
+
+# Temporary files
+*/.tmp*
+*/tmp/*
+*/temp/*
+*.tmp
+*.temp
+*.log
+*.lock
+
+# Session and state files (optional - uncomment if you want fresh sessions)
+# */Sessions/*
+# */Session Storage/*
+# */Current Session
+# */Current Tabs
+
+# Downloads and file system
+*/Downloads/*
+*/File System/*
+*/IndexedDB/*
+*/databases/*
+
+# Media licenses (DRM)
+*/WidevineCdm/*
+*/component_crx_cache/*
+
+# Extension temporary files
+*/Extension Rules/*
+*/Extension Scripts/*
+*/Extension State/*
+*/Extensions/Temp/*
+
+# Network and certificate cache
+*/Network Action Predictor*
+*/Certificate Transparency*
+*/Certificate Revocation Lists*
+*/Network Persistent State*
+
+# Optimization data
+*/Optimization Guide/*
+*/OriginTrials/*
+*/PreviewsOptOut/*
+*/Safe Browsing/*
+*/Segmentation Platform/*
+*/Trust Tokens/*
+
+# Analytics and reporting
+*/Reporting and NEL/*
+*/heavy_ad_intervention_opt_out.json
+*/Local Storage/leveldb/LOG*
+*/Local Storage/leveldb/*.log
+
+# Platform-specific exclusions
+.DS_Store
+Thumbs.db
+desktop.ini
+.directory
+
+# Lock files and PIDs
+*.pid
+*.lock
+*lockfile*
+
+# Logs
+*.log
+*/logs/*
+*/Logs/*
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary Chrome debugging
+*/DevTools/*
+*/Remote Desktop/*
+*/Pepper Data/*
+
+# Chrome OS specific
+*/GCM Store/*
+*/Origin Bound Certificates*
+*/QuotaManager*
+*/TransportSecurity* 
