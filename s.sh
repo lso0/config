@@ -251,8 +251,8 @@ fi
 # Detect current phase
 CURRENT_PHASE=$(detect_phase)
 
-# Phase 1: System Detection and OS-Specific Setup
-if [ "$CURRENT_PHASE" = "1" ]; then
+# Phase 1 function: System Detection and OS-Specific Setup
+phase1_system_detection() {
     show_phase_banner "1" "SYSTEM DETECTION & SETUP" "Detecting system and running OS-specific setup"
     
     log_phase "Starting Phase 1: System Detection and Setup"
@@ -383,6 +383,11 @@ if [ "$CURRENT_PHASE" = "1" ]; then
     echo "2. Run: ${WHITE}curl wgms.uk|bash${NC}"
     echo "3. This will automatically start Phase 2 (Chrome sync setup)"
     echo ""
+}
+
+# Phase 1: System Detection and OS-Specific Setup
+if [ "$CURRENT_PHASE" = "1" ]; then
+    phase1_system_detection
 
 # Phase 2: Post-Reboot Setup (Chrome Sync Configuration)
 elif [ "$CURRENT_PHASE" = "2" ]; then
