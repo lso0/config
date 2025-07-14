@@ -416,6 +416,141 @@ elif [ "$CURRENT_PHASE" = "2" ]; then
     
     PROFILE_SYNC_DIR="$HOME/profile_sync"
     
+    # Create profile sync scripts if they don't exist
+    if [ ! -f "$PROFILE_SYNC_DIR/scripts/upload.sh" ] || [ ! -f "$PROFILE_SYNC_DIR/scripts/download.sh" ]; then
+        log_info "Creating profile sync scripts..."
+        mkdir -p "$PROFILE_SYNC_DIR/scripts" "$PROFILE_SYNC_DIR/config" "$PROFILE_SYNC_DIR/backups"
+        
+        # Create download script
+        cat > "$PROFILE_SYNC_DIR/scripts/download.sh" << 'EOF'
+#!/bin/bash
+echo "⬇️  Chrome Profile Sync - Download from Raspberry Pi"
+echo "=================================================="
+
+PI_USER="wgr0"
+PI_HOST="192.168.1.9"
+PI_PROFILE_PATH="/home/wgr0/google-chrome"
+LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
+
+# Test connection
+echo "Testing connection to Raspberry Pi..."
+if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
+    echo "✅ Successfully connected to $PI_USER@$PI_HOST"
+else
+    echo "❌ Failed to connect to $PI_USER@$PI_HOST"
+    echo "Please ensure:"
+    echo "1. Raspberry Pi is accessible at 192.168.1.9"
+    echo "2. SSH key is configured: ssh-copy-id $PI_USER@$PI_HOST"
+    exit 1
+fi
+
+# Check if Chrome is running
+if pgrep -f "google-chrome" > /dev/null; then
+    echo "⚠️  Google Chrome is running. Please close Chrome before syncing."
+    read -p "Press Enter after closing Chrome to continue..."
+fi
+
+# Create backup of current profile
+if [ -d "$LOCAL_PROFILE_PATH" ]; then
+    echo "Creating backup of current profile..."
+    BACKUP_NAME="pre-download-$(date +%Y%m%d-%H%M%S)"
+    cp -r "$LOCAL_PROFILE_PATH" "$HOME/profile_sync/backups/$BACKUP_NAME"
+    echo "✅ Backup created: $BACKUP_NAME"
+fi
+
+# Download profile from Pi
+echo "Downloading Chrome profile from Raspberry Pi..."
+echo "This may take a few minutes..."
+
+if rsync -avhz --delete --progress \
+    --exclude='*/Cache/*' \
+    --exclude='*/Code Cache/*' \
+    --exclude='*/Media Cache/*' \
+    --exclude='*/GPUCache/*' \
+    --exclude='*/logs/*' \
+    --exclude='*.tmp' \
+    --exclude='*.log' \
+    "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/" \
+    "$LOCAL_PROFILE_PATH/"; then
+    
+    echo "✅ Profile downloaded successfully!"
+    echo "Profile size: $(du -sh "$LOCAL_PROFILE_PATH" | cut -f1)"
+    echo ""
+    echo "🚀 Next Steps:"
+    echo "1. Start Google Chrome to verify profile"
+    echo "2. To upload changes back: ./upload.sh"
+    
+else
+    echo "❌ Failed to download profile from Raspberry Pi"
+    exit 1
+fi
+EOF
+
+        # Create upload script
+        cat > "$PROFILE_SYNC_DIR/scripts/upload.sh" << 'EOF'
+#!/bin/bash
+echo "⬆️  Chrome Profile Sync - Upload to Raspberry Pi"
+echo "=============================================="
+
+PI_USER="wgr0"
+PI_HOST="192.168.1.9"
+PI_PROFILE_PATH="/home/wgr0/google-chrome"
+LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
+
+# Test connection
+echo "Testing connection to Raspberry Pi..."
+if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
+    echo "✅ Successfully connected to $PI_USER@$PI_HOST"
+else
+    echo "❌ Failed to connect to $PI_USER@$PI_HOST"
+    exit 1
+fi
+
+# Check if local profile exists
+if [ ! -d "$LOCAL_PROFILE_PATH" ]; then
+    echo "❌ Local Chrome profile not found at $LOCAL_PROFILE_PATH"
+    echo "Make sure Google Chrome is installed and has been run at least once."
+    exit 1
+fi
+
+# Check if Chrome is running
+if pgrep -f "google-chrome" > /dev/null; then
+    echo "⚠️  Google Chrome is running. Please close Chrome before syncing."
+    read -p "Press Enter after closing Chrome to continue..."
+fi
+
+# Upload profile to Pi
+echo "Uploading Chrome profile to Raspberry Pi..."
+echo "This may take a few minutes..."
+
+if rsync -avhz --delete --progress \
+    --exclude='*/Cache/*' \
+    --exclude='*/Code Cache/*' \
+    --exclude='*/Media Cache/*' \
+    --exclude='*/GPUCache/*' \
+    --exclude='*/logs/*' \
+    --exclude='*.tmp' \
+    --exclude='*.log' \
+    "$LOCAL_PROFILE_PATH/" \
+    "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/"; then
+    
+    echo "✅ Profile uploaded successfully!"
+    echo ""
+    echo "🚀 Profile is now available on Raspberry Pi"
+    echo "Download on other machines: ./download.sh"
+    
+else
+    echo "❌ Failed to upload profile to Raspberry Pi"
+    exit 1
+fi
+EOF
+
+        chmod +x "$PROFILE_SYNC_DIR/scripts/"*.sh
+        log_success "Profile sync scripts created in $PROFILE_SYNC_DIR"
+    else
+        log_info "Profile sync scripts already exist"
+    fi
+    
     # Setup SSH key if not exists
     if [ ! -f "$HOME/.ssh/id_rsa" ]; then
         log_info "Generating SSH key for Pi access..."

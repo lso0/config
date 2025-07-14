@@ -1337,12 +1337,36 @@ CHROME_SUCCESS=false
 log_info "Adding Google Chrome repository..."
 if wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add - 2>/dev/null; then
     if echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list >/dev/null; then
-        retry_command sudo apt update
-        if retry_command sudo apt install -y google-chrome-stable; then
+        # Try to update package lists, but don't fail if some repositories are broken
+        log_info "Updating package lists..."
+        if sudo apt update 2>&1 | tee -a "$LOG_FILE"; then
+            log_success "Package lists updated successfully"
+        else
+            log_warning "Package list update had some issues, but continuing with Chrome installation..."
+        fi
+        
+        # Try to install Chrome directly
+        log_info "Installing Google Chrome..."
+        if sudo apt install -y google-chrome-stable 2>&1 | tee -a "$LOG_FILE"; then
             log_success "Google Chrome installed successfully"
             CHROME_SUCCESS=true
         else
-            log_warning "Google Chrome installation failed"
+            log_warning "Google Chrome installation failed, trying alternative method..."
+            
+            # Alternative installation method
+            log_info "Trying alternative Chrome installation method..."
+            if wget -q -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb 2>/dev/null; then
+                if sudo dpkg -i /tmp/google-chrome.deb 2>&1 | tee -a "$LOG_FILE"; then
+                    sudo apt-get install -f -y 2>&1 | tee -a "$LOG_FILE" || true
+                    log_success "Google Chrome installed successfully via direct download"
+                    CHROME_SUCCESS=true
+                else
+                    log_warning "Alternative Chrome installation also failed"
+                fi
+                rm -f /tmp/google-chrome.deb
+            else
+                log_warning "Failed to download Chrome package directly"
+            fi
         fi
     else
         log_warning "Failed to add Google Chrome repository"

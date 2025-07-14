@@ -1,0 +1,14 @@
+2025-07-14 04:56:53 - INFO: Please enter your password for sudo access:
+2025-07-14 04:56:56 - PHASE: Starting Phase 1: System Detection and Setup
+2025-07-14 04:56:56 - === PHASE 1 STARTING ===
+2025-07-14 04:56:56 - === SYSTEM INFORMATION ===
+2025-07-14 04:56:56 - OS: Linux
+2025-07-14 04:56:56 - Kernel: 6.8.0-63-generic
+2025-07-14 04:56:56 - Architecture: x86_64
+2025-07-14 04:56:56 - Hostname: wgus0
+2025-07-14 04:56:56 - Distribution: Ubuntu 24.04.2 LTS
+2025-07-14 04:56:56 - Uptime:  04:56:56 up 7 min,  2 users,  load average: 0.02, 0.02, 0.00
+2025-07-14 04:56:56 - Disk Space: /dev/mapper/ubuntu--vg-ubuntu--lv   98G   11G   83G  12% /
+2025-07-14 04:56:56 - Memory: Mem:            60Gi       1.0Gi        59Gi       1.6Mi       629Mi        59Gi
+2025-07-14 04:56:56 - === END SYSTEM INFO ===
+2025-07-14 04:56:56 - INFO: Detecting system configuration...
