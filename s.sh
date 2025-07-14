@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# Multi-Phase Ubuntu Setup Script
-# Description: Automated setup with phase detection and progression
+# Universal Multi-Phase System Setup Script
+# Description: Detects system, runs appropriate setup script, then handles Chrome sync
 # Usage: curl -fsSL <your-script-url> | bash
 
 set -euo pipefail
 
 # Setup logging
 LOG_DIR="$HOME/.config/wgms-setup"
-LOG_FILE="$LOG_DIR/ubuntu-setup-$(date +%Y%m%d-%H%M%S).log"
+LOG_FILE="$LOG_DIR/universal-setup-$(date +%Y%m%d-%H%M%S).log"
 PHASE_FILE="$LOG_DIR/current-phase"
 mkdir -p "$LOG_DIR"
 
@@ -43,7 +43,7 @@ show_phase_banner() {
     
     echo ""
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}                    ${WHITE}🚀 UBUNTU SETUP SYSTEM${NC}                    ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}                    ${WHITE}🚀 UNIVERSAL SETUP SYSTEM${NC}                    ${CYAN}║${NC}"
     echo -e "${CYAN}╠══════════════════════════════════════════════════════════════╣${NC}"
     echo -e "${CYAN}║${NC}  ${PURPLE}PHASE $phase${NC} - ${WHITE}$title${NC}"
     echo -e "${CYAN}║${NC}  ${BLUE}$description${NC}"
@@ -108,6 +108,134 @@ retry_command() {
     done
 }
 
+# System detection function
+detect_system() {
+    local os_type=""
+    local arch=""
+    local distro=""
+    
+    # Detect OS type
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        os_type="linux"
+        
+        # Detect Linux distribution
+        if command -v lsb_release >/dev/null 2>&1; then
+            distro=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+        elif [[ -f /etc/os-release ]]; then
+            distro=$(grep '^ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"' | tr '[:upper:]' '[:lower:]')
+        elif [[ -f /etc/redhat-release ]]; then
+            distro="rhel"
+        elif [[ -f /etc/debian_version ]]; then
+            distro="debian"
+        else
+            distro="unknown"
+        fi
+        
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        os_type="macos"
+        distro="macos"
+        
+    elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
+        os_type="windows"
+        distro="windows"
+        
+    else
+        log_error "Unsupported operating system: $OSTYPE"
+        exit 1
+    fi
+    
+    # Detect architecture
+    arch=$(uname -m)
+    case $arch in
+        x86_64|amd64)
+            arch="amd64"
+            ;;
+        aarch64|arm64)
+            arch="arm64"
+            ;;
+        armv7l)
+            arch="armv7"
+            ;;
+        i386|i686)
+            arch="386"
+            ;;
+        *)
+            log_warning "Unknown architecture: $arch"
+            ;;
+    esac
+    
+    echo "$os_type:$distro:$arch"
+}
+
+# Hardware detection function
+detect_hardware() {
+    local hardware_info=""
+    
+    # Check if running in a container
+    if [[ -f /.dockerenv ]] || grep -q docker /proc/1/cgroup 2>/dev/null; then
+        hardware_info="container:docker"
+    elif grep -q lxc /proc/1/cgroup 2>/dev/null; then
+        hardware_info="container:lxc"
+    elif command -v systemd-detect-virt >/dev/null 2>&1; then
+        local virt_type=$(systemd-detect-virt)
+        if [[ "$virt_type" != "none" ]]; then
+            hardware_info="vm:$virt_type"
+        fi
+    fi
+    
+    # Check for Raspberry Pi
+    if [[ -f /proc/device-tree/model ]] && grep -q "Raspberry Pi" /proc/device-tree/model; then
+        hardware_info="raspberry-pi"
+    fi
+    
+    # Check for cloud providers
+    if curl -s --max-time 2 http://169.254.169.254/latest/meta-data/ >/dev/null 2>&1; then
+        hardware_info="cloud:aws"
+    elif curl -s --max-time 2 -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/ >/dev/null 2>&1; then
+        hardware_info="cloud:gcp"
+    elif curl -s --max-time 2 -H "Metadata: true" http://169.254.169.254/metadata/instance >/dev/null 2>&1; then
+        hardware_info="cloud:azure"
+    fi
+    
+    echo "$hardware_info"
+}
+
+# Network detection function
+detect_network() {
+    local network_info=""
+    
+    # Check internet connectivity
+    if ! curl -s --max-time 5 https://www.google.com >/dev/null 2>&1; then
+        log_error "No internet connectivity detected"
+        exit 1
+    fi
+    
+    # Check for common corporate/restricted networks
+    if curl -s --max-time 2 http://detectportal.firefox.com/canonical.html | grep -q "success" 2>/dev/null; then
+        network_info="open"
+    else
+        network_info="restricted"
+    fi
+    
+    echo "$network_info"
+}
+
+# Function to log system information
+log_system_info() {
+    log_to_file "=== SYSTEM INFORMATION ==="
+    log_to_file "OS: $(uname -s)"
+    log_to_file "Kernel: $(uname -r)"
+    log_to_file "Architecture: $(uname -m)"
+    log_to_file "Hostname: $(hostname)"
+    if command -v lsb_release >/dev/null 2>&1; then
+        log_to_file "Distribution: $(lsb_release -d | cut -f2)"
+    fi
+    log_to_file "Uptime: $(uptime)"
+    log_to_file "Disk Space: $(df -h / | tail -1)"
+    log_to_file "Memory: $(free -h | grep '^Mem:' || echo 'N/A')"
+    log_to_file "=== END SYSTEM INFO ==="
+}
+
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
    log_error "This script should not be run as root. Please run as a regular user with sudo privileges."
@@ -123,266 +251,126 @@ fi
 # Detect current phase
 CURRENT_PHASE=$(detect_phase)
 
-# Phase 1: Initial Setup (Desktop, Tools, Chrome)
+# Phase 1: System Detection and OS-Specific Setup
 if [ "$CURRENT_PHASE" = "1" ]; then
-    show_phase_banner "1" "INITIAL SETUP" "Installing desktop environment, development tools, and Google Chrome"
+    show_phase_banner "1" "SYSTEM DETECTION & SETUP" "Detecting system and running OS-specific setup"
     
-    log_phase "Starting Phase 1: Initial Setup"
+    log_phase "Starting Phase 1: System Detection and Setup"
     log_to_file "=== PHASE 1 STARTING ==="
     
     # Log system information
-    log_to_file "=== SYSTEM INFORMATION ==="
-    log_to_file "OS: $(uname -a)"
-    log_to_file "Distribution: $(lsb_release -a 2>/dev/null || cat /etc/os-release)"
-    log_to_file "Uptime: $(uptime)"
-    log_to_file "Disk Space: $(df -h)"
-    log_to_file "Memory: $(free -h)"
-    log_to_file "User: $(whoami)"
-    log_to_file "Groups: $(groups)"
-    log_to_file "=== END SYSTEM INFO ==="
-
-    # System Update
-    log_info "Updating system packages..."
-    retry_command sudo apt update
-    retry_command sudo apt full-upgrade -y
-    log_success "System updated successfully"
-
-    # Install essential packages
-    log_info "Installing essential packages..."
-    retry_command sudo apt install -y git curl wget unzip htop tree vim nano build-essential software-properties-common apt-transport-https ca-certificates gnupg lsb-release ufw fail2ban openssh-server
-    log_success "Essential packages installed"
-
-    # Initialize success flags
-    GITHUB_CLI_SUCCESS=false
-    DOCKER_SUCCESS=false
-    TAILSCALE_SUCCESS=false
-    MULLVAD_SUCCESS=false
-    GCLOUD_SUCCESS=false
-    QEMU_SUCCESS=false
-    ZSH_SUCCESS=false
-    BROWSER_AUTOMATION_SUCCESS=false
-    DESKTOP_SUCCESS=false
-    CHROME_SUCCESS=false
-    INFISICAL_SUCCESS=false
-    NODE_SUCCESS=false
-    YAZI_SUCCESS=false
-    SPEEDTEST_SUCCESS=false
-
-    # Install GitHub CLI
-    log_info "Installing GitHub CLI..."
-    GITHUB_CLI_SUCCESS=false
-    log_info "Downloading GitHub CLI GPG key..."
-    if curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /usr/share/keyrings/githubcli-archive-keyring.gpg > /dev/null; then
-        sudo chmod 644 /usr/share/keyrings/githubcli-archive-keyring.gpg
-        log_success "GitHub CLI GPG key imported successfully"
+    log_system_info
+    
+    # Detect system information
+    log_info "Detecting system configuration..."
+    local system_info=$(detect_system)
+    local hardware_info=$(detect_hardware)
+    local network_info=$(detect_network)
+    
+    # Parse system info
+    IFS=':' read -r os_type distro arch <<< "$system_info"
+    
+    log_info "System: $os_type ($distro) on $arch"
+    [[ -n "$hardware_info" ]] && log_info "Hardware: $hardware_info"
+    log_info "Network: $network_info"
+    
+    # Log detection results
+    log_to_file "=== DETECTION RESULTS ==="
+    log_to_file "OS Type: $os_type"
+    log_to_file "Distribution: $distro"
+    log_to_file "Architecture: $arch"
+    log_to_file "Hardware: $hardware_info"
+    log_to_file "Network: $network_info"
+    log_to_file "=== END DETECTION ==="
+    
+    # Determine which script to run
+    local script_url=""
+    
+    case "$os_type" in
+        "linux")
+            case "$distro" in
+                "ubuntu"|"debian")
+                    script_url="https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh"
+                    ;;
+                "nixos")
+                    script_url="https://raw.githubusercontent.com/lso0/config/main/linux/nixos/setup.sh"
+                    ;;
+                "arch"|"manjaro")
+                    script_url="https://raw.githubusercontent.com/lso0/config/main/linux/arch/setup.sh"
+                    ;;
+                *)
+                    log_warning "Unsupported Linux distribution: $distro"
+                    log_info "Trying generic Ubuntu script..."
+                    script_url="https://raw.githubusercontent.com/lso0/config/main/linux/ubuntu-s/s.sh"
+                    ;;
+            esac
+            ;;
+        "macos")
+            script_url="https://raw.githubusercontent.com/lso0/config/main/macos/setup.sh"
+            ;;
+        "windows")
+            script_url="https://raw.githubusercontent.com/lso0/config/main/windows/setup.ps1"
+            log_error "Windows PowerShell script detected. Please run:"
+            log_error "Invoke-WebRequest -Uri '$script_url' | Invoke-Expression"
+            exit 1
+            ;;
+        *)
+            log_error "Unsupported operating system: $os_type"
+            exit 1
+            ;;
+    esac
+    
+    log_success "✅ Selected script: $script_url"
+    log_to_file "Selected script URL: $script_url"
+    log_info "🔄 Downloading and executing setup script..."
+    
+    # Download and execute the appropriate script with logging
+    log_to_file "=== EXECUTING PLATFORM SCRIPT ==="
+    
+    # Execute with output capture and improved error handling
+    local temp_script="/tmp/setup_script_$$.sh"
+    local script_exit_code=0
+    
+    # Download script first to check for errors
+    if curl -fsSL "$script_url" -o "$temp_script" 2>&1 | tee -a "$LOG_FILE"; then
+        # Make script executable and run it
+        chmod +x "$temp_script"
         
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        # Capture both output and exit code
+        if bash "$temp_script" 2>&1 | tee -a "$LOG_FILE"; then
+            script_exit_code=0
+        else
+            script_exit_code=$?
+        fi
         
-        if retry_command sudo apt update; then
-            if retry_command sudo apt install -y gh; then
-                log_success "GitHub CLI installed successfully"
-                GITHUB_CLI_SUCCESS=true
+        # Clean up temp script
+        rm -f "$temp_script"
+        
+        # Check for success indicators in the logs
+        if grep -q "Setup Complete\|🎉.*Complete" "$LOG_FILE" || [ $script_exit_code -eq 0 ]; then
+            log_success "🎉 OS-specific setup completed successfully!"
+            log_to_file "Platform script execution: SUCCESS"
+        else
+            # Check if it's a partial success (most core components installed)
+            if grep -q "SUCCESS.*packages installed\|SUCCESS.*tools installed\|SUCCESS.*Development tools installed" "$LOG_FILE"; then
+                log_success "🎉 OS-specific setup completed with partial success!"
+                log_warning "Some optional packages may have been skipped, but core installation succeeded"
+                log_to_file "Platform script execution: PARTIAL SUCCESS"
+            else
+                log_error "❌ OS-specific setup failed. Please check the logs above."
+                log_to_file "Platform script execution: FAILED"
+                exit 1
             fi
         fi
-    fi
-
-    # Install Docker
-    log_info "Installing Docker..."
-    DOCKER_SUCCESS=false
-    retry_command sudo apt install -y ca-certificates gnupg
-    sudo install -m 0755 -d /etc/apt/keyrings
-    
-    if curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg; then
-        sudo chmod 644 /etc/apt/keyrings/docker.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        
-        if retry_command sudo apt update; then
-            if retry_command sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
-                sudo usermod -aG docker $USER
-                sudo systemctl enable docker
-                sudo systemctl start docker
-                log_success "Docker installed and configured"
-                DOCKER_SUCCESS=true
-            fi
-        fi
-    fi
-
-    # Install Desktop Environment
-    log_info "Installing Ubuntu Desktop Environment..."
-    DESKTOP_SUCCESS=false
-    
-    if retry_command sudo apt install -y ubuntu-desktop-minimal; then
-        log_success "Ubuntu Desktop Environment installed"
-        DESKTOP_SUCCESS=true
     else
-        log_warning "Ubuntu Desktop installation failed, trying alternative..."
-        if retry_command sudo apt install -y xorg xfce4 xfce4-goodies lightdm; then
-            log_success "XFCE Desktop Environment installed as alternative"
-            DESKTOP_SUCCESS=true
-        fi
+        log_error "❌ Failed to download setup script from: $script_url"
+        log_to_file "Platform script download: FAILED"
+        exit 1
     fi
-
-    # Install Google Chrome
-    log_info "Installing Google Chrome..."
-    CHROME_SUCCESS=false
-    
-    if wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add - 2>/dev/null; then
-        if echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list >/dev/null; then
-            retry_command sudo apt update
-            if retry_command sudo apt install -y google-chrome-stable; then
-                log_success "Google Chrome installed successfully"
-                CHROME_SUCCESS=true
-            fi
-        fi
-    fi
-
-    # Install Chrome Profile Sync System
-    if [ "$CHROME_SUCCESS" = true ]; then
-        log_info "Setting up Chrome Profile Sync System..."
-        
-        PROFILE_SYNC_DIR="$HOME/profile_sync"
-        mkdir -p "$PROFILE_SYNC_DIR"
-        
-        # Create basic profile sync structure
-        mkdir -p "$PROFILE_SYNC_DIR/scripts" "$PROFILE_SYNC_DIR/config" "$PROFILE_SYNC_DIR/backups"
-        
-        # Create download script
-        cat > "$PROFILE_SYNC_DIR/scripts/download.sh" << 'EOF'
-#!/bin/bash
-echo "⬇️  Chrome Profile Sync - Download from Raspberry Pi"
-echo "=================================================="
-
-PI_USER="wgr0"
-PI_HOST="192.168.1.9"
-PI_PROFILE_PATH="/home/wgr0/google-chrome"
-LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
-
-# Test connection
-echo "Testing connection to Raspberry Pi..."
-if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
-    echo "✅ Successfully connected to $PI_USER@$PI_HOST"
-else
-    echo "❌ Failed to connect to $PI_USER@$PI_HOST"
-    echo "Please ensure:"
-    echo "1. Raspberry Pi is accessible at 192.168.1.9"
-    echo "2. SSH key is configured: ssh-copy-id $PI_USER@$PI_HOST"
-    exit 1
-fi
-
-# Check if Chrome is running
-if pgrep -f "google-chrome" > /dev/null; then
-    echo "⚠️  Google Chrome is running. Please close Chrome before syncing."
-    read -p "Press Enter after closing Chrome to continue..."
-fi
-
-# Create backup of current profile
-if [ -d "$LOCAL_PROFILE_PATH" ]; then
-    echo "Creating backup of current profile..."
-    BACKUP_NAME="pre-download-$(date +%Y%m%d-%H%M%S)"
-    cp -r "$LOCAL_PROFILE_PATH" "$HOME/profile_sync/backups/$BACKUP_NAME"
-    echo "✅ Backup created: $BACKUP_NAME"
-fi
-
-# Download profile from Pi
-echo "Downloading Chrome profile from Raspberry Pi..."
-echo "This may take a few minutes..."
-
-if rsync -avhz --delete --progress \
-    --exclude='*/Cache/*' \
-    --exclude='*/Code Cache/*' \
-    --exclude='*/Media Cache/*' \
-    --exclude='*/GPUCache/*' \
-    --exclude='*/logs/*' \
-    --exclude='*.tmp' \
-    --exclude='*.log' \
-    "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/" \
-    "$LOCAL_PROFILE_PATH/"; then
-    
-    echo "✅ Profile downloaded successfully!"
-    echo "Profile size: $(du -sh "$LOCAL_PROFILE_PATH" | cut -f1)"
-    echo ""
-    echo "🚀 Next Steps:"
-    echo "1. Start Google Chrome to verify profile"
-    echo "2. To upload changes back: ./upload.sh"
-    
-else
-    echo "❌ Failed to download profile from Raspberry Pi"
-    exit 1
-fi
-EOF
-
-        # Create upload script
-        cat > "$PROFILE_SYNC_DIR/scripts/upload.sh" << 'EOF'
-#!/bin/bash
-echo "⬆️  Chrome Profile Sync - Upload to Raspberry Pi"
-echo "=============================================="
-
-PI_USER="wgr0"
-PI_HOST="192.168.1.9"
-PI_PROFILE_PATH="/home/wgr0/google-chrome"
-LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
-
-# Test connection
-echo "Testing connection to Raspberry Pi..."
-if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
-    echo "✅ Successfully connected to $PI_USER@$PI_HOST"
-else
-    echo "❌ Failed to connect to $PI_USER@$PI_HOST"
-    exit 1
-fi
-
-# Check if local profile exists
-if [ ! -d "$LOCAL_PROFILE_PATH" ]; then
-    echo "❌ Local Chrome profile not found at $LOCAL_PROFILE_PATH"
-    echo "Make sure Google Chrome is installed and has been run at least once."
-    exit 1
-fi
-
-# Check if Chrome is running
-if pgrep -f "google-chrome" > /dev/null; then
-    echo "⚠️  Google Chrome is running. Please close Chrome before syncing."
-    read -p "Press Enter after closing Chrome to continue..."
-fi
-
-# Upload profile to Pi
-echo "Uploading Chrome profile to Raspberry Pi..."
-echo "This may take a few minutes..."
-
-if rsync -avhz --delete --progress \
-    --exclude='*/Cache/*' \
-    --exclude='*/Code Cache/*' \
-    --exclude='*/Media Cache/*' \
-    --exclude='*/GPUCache/*' \
-    --exclude='*/logs/*' \
-    --exclude='*.tmp' \
-    --exclude='*.log' \
-    "$LOCAL_PROFILE_PATH/" \
-    "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/"; then
-    
-    echo "✅ Profile uploaded successfully!"
-    echo ""
-    echo "🚀 Profile is now available on Raspberry Pi"
-    echo "Download on other machines: ./download.sh"
-    
-else
-    echo "❌ Failed to upload profile to Raspberry Pi"
-    exit 1
-fi
-EOF
-
-        chmod +x "$PROFILE_SYNC_DIR/scripts/"*.sh
-        log_success "Chrome profile sync scripts created in $PROFILE_SYNC_DIR"
-    fi
-
-    # Cleanup
-    log_info "Cleaning up..."
-    sudo apt autoremove -y
-    sudo apt autoclean
-    log_success "Cleanup completed"
 
     # Phase 1 completion
     log_phase "Phase 1 completed successfully!"
-    log_success "🎉 Initial setup complete! Desktop environment and Chrome installed."
+    log_success "🎉 System detection and OS-specific setup complete!"
     
     # Set phase to 2 for next run
     set_phase "2"
@@ -391,23 +379,10 @@ EOF
     echo -e "${GREEN}✅ PHASE 1 COMPLETE!${NC}"
     echo ""
     echo -e "${CYAN}Next Steps:${NC}"
-    echo "1. System will reboot to enable desktop environment"
-    echo "2. After reboot, run: ${WHITE}curl wgms.uk|bash${NC}"
+    echo "1. OS-specific setup completed"
+    echo "2. Run: ${WHITE}curl wgms.uk|bash${NC}"
     echo "3. This will automatically start Phase 2 (Chrome sync setup)"
     echo ""
-    
-    # Automatic reboot
-    echo -e "${YELLOW}Rebooting in 10 seconds to enable desktop environment...${NC}"
-    echo "Press Ctrl+C to cancel reboot"
-    
-    for i in 10 9 8 7 6 5 4 3 2 1; do
-        echo -n "Rebooting in $i seconds... "
-        sleep 1
-        echo ""
-    done
-    
-    log_info "Rebooting now..."
-    sudo reboot
 
 # Phase 2: Post-Reboot Setup (Chrome Sync Configuration)
 elif [ "$CURRENT_PHASE" = "2" ]; then
