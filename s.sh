@@ -587,6 +587,56 @@ EOF
     log_info "Creating profile directory on Raspberry Pi..."
     ssh -o ConnectTimeout=10 wgr0@192.168.1.9 "mkdir -p ~/profile_sync" 2>/dev/null || true
     
+    # Check if Chrome profile exists on Pi and download it automatically
+    log_info "Checking for existing Chrome profile on Raspberry Pi..."
+    if ssh -o ConnectTimeout=10 wgr0@192.168.1.9 "[ -d ~/google-chrome ]" 2>/dev/null; then
+        log_success "✅ Chrome profile found on Raspberry Pi"
+        log_info "Downloading Chrome profile from Pi..."
+        
+        # Check if Chrome is running locally
+        if pgrep -f "google-chrome" > /dev/null; then
+            log_warning "⚠️  Google Chrome is running. Please close Chrome before syncing."
+            log_info "You can manually run: cd ~/profile_sync && ./scripts/download.sh"
+        else
+            # Download profile from Pi
+            LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
+            PI_USER="wgr0"
+            PI_HOST="192.168.1.9"
+            PI_PROFILE_PATH="/home/wgr0/google-chrome"
+            
+            # Create backup of current profile if it exists
+            if [ -d "$LOCAL_PROFILE_PATH" ]; then
+                log_info "Creating backup of current profile..."
+                BACKUP_NAME="pre-download-$(date +%Y%m%d-%H%M%S)"
+                cp -r "$LOCAL_PROFILE_PATH" "$HOME/profile_sync/backups/$BACKUP_NAME"
+                log_success "Backup created: $BACKUP_NAME"
+            fi
+            
+            # Download profile using rsync
+            if rsync -avhz --delete --progress \
+                --exclude='*/Cache/*' \
+                --exclude='*/Code Cache/*' \
+                --exclude='*/Media Cache/*' \
+                --exclude='*/GPUCache/*' \
+                --exclude='*/logs/*' \
+                --exclude='*.tmp' \
+                --exclude='*.log' \
+                "$PI_USER@$PI_HOST:$PI_PROFILE_PATH/" \
+                "$LOCAL_PROFILE_PATH/" 2>&1 | tee -a "$LOG_FILE"; then
+                
+                log_success "✅ Chrome profile downloaded successfully!"
+                log_info "Profile size: $(du -sh "$LOCAL_PROFILE_PATH" | cut -f1)"
+                log_info "Your Chrome profile is now synced from Raspberry Pi!"
+            else
+                log_warning "❌ Failed to download profile automatically"
+                log_info "You can manually run: cd ~/profile_sync && ./scripts/download.sh"
+            fi
+        fi
+    else
+        log_info "No existing Chrome profile found on Raspberry Pi"
+        log_info "After you create a profile, you can upload it with: cd ~/profile_sync && ./scripts/upload.sh"
+    fi
+    
     # Set phase to 3 for next run
     set_phase "3"
     
