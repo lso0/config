@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Universal Multi-Phase System Setup Script
+# Universal Multi-Phase System Setup Script :)
 # Description: Detects system, runs appropriate setup script, then handles Chrome sync
 # Usage: curl -fsSL <your-script-url> | bash
 
