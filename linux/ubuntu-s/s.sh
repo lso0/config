@@ -1325,8 +1325,16 @@ else
         log_success "XFCE Desktop Environment installed as alternative"
         DESKTOP_SUCCESS=true
     else
-        log_warning "Desktop environment installation failed"
-    fi
+            log_warning "Desktop environment installation failed"
+fi
+
+# Configure SSH server (after desktop environment)
+log_info "Configuring SSH server..."
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo ufw allow ssh
+log_success "SSH server configured and enabled"
+log_info "SSH is now enabled and will start automatically on boot"
 fi
 
 # Install Google Chrome
