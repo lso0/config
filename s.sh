@@ -380,9 +380,23 @@ phase1_system_detection() {
     echo ""
     echo -e "${CYAN}Next Steps:${NC}"
     echo "1. OS-specific setup completed"
-    echo "2. Run: ${WHITE}curl wgms.uk|bash${NC}"
-    echo "3. This will automatically start Phase 2 (Chrome sync setup)"
+    echo "2. System will reboot to enable all services"
+    echo "3. After reboot, run: ${WHITE}curl wgms.uk|bash${NC}"
+    echo "4. This will automatically start Phase 2 (Chrome sync setup)"
     echo ""
+    
+    # Automatic reboot after Phase 1
+    echo -e "${YELLOW}Rebooting in 10 seconds to enable all services...${NC}"
+    echo "Press Ctrl+C to cancel reboot"
+    
+    for i in 10 9 8 7 6 5 4 3 2 1; do
+        echo -n "Rebooting in $i seconds... "
+        sleep 1
+        echo ""
+    done
+    
+    log_info "Rebooting now..."
+    sudo reboot
 }
 
 # Phase 1: System Detection and OS-Specific Setup
