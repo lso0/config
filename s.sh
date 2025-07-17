@@ -380,144 +380,9 @@ phase1_system_detection() {
     echo ""
     echo -e "${CYAN}Next Steps:${NC}"
     echo "1. OS-specific setup completed"
-    echo "2. System will reboot to enable all services"
-    echo "3. After reboot, SSH and Tailscale will be configured automatically"
-    echo "4. Then run: ${WHITE}curl wgms.uk|bash${NC}"
-    echo "5. This will automatically start Phase 2 (Chrome sync setup)"
+    echo "2. Run: ${WHITE}curl wgms.uk|bash${NC}"
+    echo "3. This will automatically start Phase 2 (Chrome sync setup)"
     echo ""
-    
-    # Create post-reboot setup script
-    log_info "Creating post-reboot setup script..."
-    cat > "$HOME/post-reboot-setup.sh" << 'EOF'
-#!/bin/bash
-
-# Post-Reboot Setup Script
-# This script runs after reboot to configure SSH and Tailscale
-
-set -euo pipefail
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-echo "🚀 Post-Reboot Setup Starting..."
-
-# Wait a bit for system to fully boot
-sleep 10
-
-# Configure SSH
-log_info "Configuring SSH server..."
-sudo apt update
-sudo apt install openssh-server -y
-sudo systemctl enable ssh
-sudo systemctl start ssh
-sudo ufw allow ssh
-log_success "SSH server configured and enabled"
-
-# Check if Tailscale is installed
-if command -v tailscale >/dev/null 2>&1; then
-    log_info "Tailscale detected, configuring..."
-    
-    # Check if Infisical is available
-    if command -v infisical >/dev/null 2>&1; then
-        log_info "Infisical detected, fetching Tailscale auth key..."
-        
-        # Create .env file with Infisical secrets
-        log_info "Fetching secrets from Infisical..."
-        if infisical secrets --projectId=13bce4c5-1ffc-478b-b1ce-76726074f358 --env=dev --recursive --domain=http://100.74.180.50 --token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eUlkIjoiNTk5ODVhOWQtNTVkMC00NjIyLWE4YzUtNmNmM2ExMmIyMjIwIiwiaWRlbnRpdHlBY2Nlc3NUb2tlbklkIjoiMDFjM2IzMjMtNDNiMy00ZDYxLTk4YjEtMTcwZTU5YmM1MTYyIiwiYXV0aFRva2VuVHlwZSI6ImlkZW50aXR5QWNjZXNzVG9rZW4iLCJpYXQiOjE3NTI3MzY5MTIsImV4cCI6MTc1NTMyODkxMn0.lTh9t7zy2WZB7O4lGo_lt9K7pK070IAtLI2RyiwsITg" > .env 2>/dev/null; then
-            
-            # Extract Tailscale auth key from .env
-            if TAILSCALE_AUTHKEY=$(grep -E "^TAILSCALE_AUTHKEY=" .env | cut -d'=' -f2- | tr -d '"'); then
-                log_success "Tailscale auth key retrieved from Infisical"
-                
-                # Configure Tailscale
-                log_info "Configuring Tailscale with auth key..."
-                if sudo tailscale up --authkey="$TAILSCALE_AUTHKEY" --hostname=$(whoami) 2>/dev/null; then
-                    sudo tailscale set --ssh
-                    log_success "Tailscale configured successfully"
-                    log_info "Tailscale IP: $(tailscale ip -4)"
-                else
-                    log_warning "Tailscale configuration failed"
-                fi
-            else
-                log_warning "Could not extract Tailscale auth key from .env"
-            fi
-            
-            # Clean up .env file
-            rm -f .env
-        else
-            log_warning "Failed to fetch secrets from Infisical"
-        fi
-    else
-        log_warning "Infisical not found, skipping Tailscale auto-configuration"
-    fi
-else
-    log_warning "Tailscale not found, skipping configuration"
-fi
-
-log_success "🎉 Post-reboot setup completed!"
-echo ""
-echo -e "${GREEN}✅ System is ready for remote access!${NC}"
-echo ""
-echo -e "${CYAN}Next Steps:${NC}"
-echo "1. SSH is enabled and configured"
-echo "2. Tailscale is configured (if available)"
-echo "3. You can now SSH to this machine and run: ${WHITE}curl wgms.uk|bash${NC}"
-echo "4. This will start Phase 2 (Chrome sync setup)"
-echo ""
-
-# Remove this script
-rm -f "$0"
-EOF
-
-    chmod +x "$HOME/post-reboot-setup.sh"
-    
-    # Add to startup applications
-    log_info "Adding post-reboot script to startup..."
-    mkdir -p "$HOME/.config/autostart"
-    cat > "$HOME/.config/autostart/post-reboot-setup.desktop" << EOF
-[Desktop Entry]
-Type=Application
-Name=Post-Reboot Setup
-Exec=$HOME/post-reboot-setup.sh
-Terminal=true
-Hidden=false
-X-GNOME-Autostart-enabled=true
-EOF
-    
-    log_success "Post-reboot setup script created and configured"
-    
-    # Automatic reboot
-    echo -e "${YELLOW}Rebooting in 10 seconds to enable all services...${NC}"
-    echo "Press Ctrl+C to cancel reboot"
-    
-    for i in 10 9 8 7 6 5 4 3 2 1; do
-        echo -n "Rebooting in $i seconds... "
-        sleep 1
-        echo ""
-    done
-    
-    log_info "Rebooting now..."
-    sudo reboot
 }
 
 # Phase 1: System Detection and OS-Specific Setup
@@ -563,24 +428,9 @@ echo "⬇️  Chrome Profile Sync - Download from Raspberry Pi"
 echo "=================================================="
 
 PI_USER="wgr0"
-PI_HOST=""
+PI_HOST="192.168.1.9"
 PI_PROFILE_PATH="/home/wgr0/google-chrome"
 LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
-
-# Determine Pi connection method (Tailscale vs local IP)
-if command -v tailscale >/dev/null 2>&1 && tailscale status >/dev/null 2>&1; then
-    echo "🔍 Detecting Pi via Tailscale..."
-    if TAILSCALE_PI_IP=$(tailscale status | grep -E "raspberry|pi|wgr0" | head -1 | awk '{print $1}'); then
-        PI_HOST="$TAILSCALE_PI_IP"
-        echo "✅ Found Pi via Tailscale: $PI_HOST"
-    else
-        echo "⚠️  Pi not found in Tailscale, using local IP..."
-        PI_HOST="192.168.1.9"
-    fi
-else
-    echo "🌐 Using local network connection..."
-    PI_HOST="192.168.1.9"
-fi
 
 # Test connection
 echo "Testing connection to Raspberry Pi..."
@@ -643,24 +493,9 @@ echo "⬆️  Chrome Profile Sync - Upload to Raspberry Pi"
 echo "=============================================="
 
 PI_USER="wgr0"
-PI_HOST=""
+PI_HOST="192.168.1.9"
 PI_PROFILE_PATH="/home/wgr0/google-chrome"
 LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
-
-# Determine Pi connection method (Tailscale vs local IP)
-if command -v tailscale >/dev/null 2>&1 && tailscale status >/dev/null 2>&1; then
-    echo "🔍 Detecting Pi via Tailscale..."
-    if TAILSCALE_PI_IP=$(tailscale status | grep -E "raspberry|pi|wgr0" | head -1 | awk '{print $1}'); then
-        PI_HOST="$TAILSCALE_PI_IP"
-        echo "✅ Found Pi via Tailscale: $PI_HOST"
-    else
-        echo "⚠️  Pi not found in Tailscale, using local IP..."
-        PI_HOST="192.168.1.9"
-    fi
-else
-    echo "🌐 Using local network connection..."
-    PI_HOST="192.168.1.9"
-fi
 
 # Test connection
 echo "Testing connection to Raspberry Pi..."
@@ -725,75 +560,36 @@ EOF
         log_info "SSH key already exists"
     fi
     
-    # Copy SSH key to Pi (try both Tailscale and local IP)
+    # Copy SSH key to Pi
     log_info "Setting up SSH key authentication with Raspberry Pi..."
     echo "You may need to enter your password for the Raspberry Pi:"
     
-    SSH_KEY_COPIED=false
-    
-    # Try Tailscale first
-    if [ -n "$PI_HOST" ] && [ "$PI_HOST" != "192.168.1.9" ]; then
-        log_info "Trying to copy SSH key via Tailscale ($PI_HOST)..."
-        if ssh-copy-id -i "$HOME/.ssh/id_rsa.pub" "wgr0@$PI_HOST"; then
-            log_success "SSH key copied to Raspberry Pi via Tailscale"
-            SSH_KEY_COPIED=true
-        else
-            log_warning "Failed to copy SSH key via Tailscale, trying local IP..."
-        fi
-    fi
-    
-    # Fallback to local IP
-    if [ "$SSH_KEY_COPIED" = false ]; then
-        log_info "Trying to copy SSH key via local IP (192.168.1.9)..."
-        if ssh-copy-id -i "$HOME/.ssh/id_rsa.pub" wgr0@192.168.1.9; then
-            log_success "SSH key copied to Raspberry Pi via local IP"
-            SSH_KEY_COPIED=true
-        else
-            log_error "Failed to copy SSH key to Pi"
-            log_info "You can manually run: ssh-copy-id -i ~/.ssh/id_rsa.pub wgr0@192.168.1.9"
-        fi
+    if ssh-copy-id -i "$HOME/.ssh/id_rsa.pub" wgr0@192.168.1.9; then
+        log_success "SSH key copied to Raspberry Pi"
+    else
+        log_error "Failed to copy SSH key to Pi"
+        log_info "You can manually run: ssh-copy-id -i ~/.ssh/id_rsa.pub wgr0@192.168.1.9"
     fi
     
     # Test connection
     log_info "Testing connection to Raspberry Pi..."
-    if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "echo 'Connection successful'" >/dev/null 2>&1; then
+    if ssh -o ConnectTimeout=10 wgr0@192.168.1.9 "echo 'Connection successful'" >/dev/null 2>&1; then
         log_success "✅ SSH connection to Raspberry Pi successful!"
     else
         log_warning "❌ SSH connection failed"
         log_info "Please check:"
-        log_info "1. Raspberry Pi is accessible at $PI_HOST"
+        log_info "1. Raspberry Pi is accessible at 192.168.1.9"
         log_info "2. SSH service is running on Pi"
         log_info "3. User 'wgr0' exists on Pi"
     fi
     
     # Create profile directory on Pi
     log_info "Creating profile directory on Raspberry Pi..."
-    ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "mkdir -p ~/profile_sync" 2>/dev/null || true
-    
-    # Determine Pi connection method (Tailscale vs local IP)
-    PI_USER="wgr0"
-    PI_HOST=""
-    PI_PROFILE_PATH="/home/wgr0/google-chrome"
-    
-    # Try Tailscale first, then fallback to local IP
-    if command -v tailscale >/dev/null 2>&1 && tailscale status >/dev/null 2>&1; then
-        log_info "Tailscale detected, trying to find Pi via Tailscale..."
-        # Try to find Pi by hostname in Tailscale network
-        if TAILSCALE_PI_IP=$(tailscale status | grep -E "raspberry|pi|wgr0" | head -1 | awk '{print $1}'); then
-            PI_HOST="$TAILSCALE_PI_IP"
-            log_success "✅ Found Pi via Tailscale: $PI_HOST"
-        else
-            log_warning "Pi not found in Tailscale network, trying local IP..."
-            PI_HOST="192.168.1.9"
-        fi
-    else
-        log_info "Tailscale not available, using local IP..."
-        PI_HOST="192.168.1.9"
-    fi
+    ssh -o ConnectTimeout=10 wgr0@192.168.1.9 "mkdir -p ~/profile_sync" 2>/dev/null || true
     
     # Check if Chrome profile exists on Pi and download it automatically
-    log_info "Checking for existing Chrome profile on Raspberry Pi ($PI_HOST)..."
-    if ssh -o ConnectTimeout=10 "$PI_USER@$PI_HOST" "[ -d ~/google-chrome ]" 2>/dev/null; then
+    log_info "Checking for existing Chrome profile on Raspberry Pi..."
+    if ssh -o ConnectTimeout=10 wgr0@192.168.1.9 "[ -d ~/google-chrome ]" 2>/dev/null; then
         log_success "✅ Chrome profile found on Raspberry Pi"
         log_info "Downloading Chrome profile from Pi..."
         
@@ -804,6 +600,9 @@ EOF
         else
             # Download profile from Pi
             LOCAL_PROFILE_PATH="$HOME/.config/google-chrome"
+            PI_USER="wgr0"
+            PI_HOST="192.168.1.9"
+            PI_PROFILE_PATH="/home/wgr0/google-chrome"
             
             # Create backup of current profile if it exists
             if [ -d "$LOCAL_PROFILE_PATH" ]; then
